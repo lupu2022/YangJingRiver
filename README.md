@@ -1,2 +1,2 @@
 # YangJingRiver
-A rust audio synthesis engine
+A vectorized audio synthesis library.

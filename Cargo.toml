@@ -1,0 +1,11 @@
+[package]
+name = "yjriver"
+version = "0.1.0"
+edition = "2021"
+
+authors = ["Zhou Chang"]
+description = "A vectorized audio synthesis library."
+
+repository = "https://github.com/lupu2022/YangJingRiver.git"
+
+[dependencies]
