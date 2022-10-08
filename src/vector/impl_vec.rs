@@ -17,7 +17,7 @@ impl<T> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// use rulinalg::vector::Vector;
+    /// use yjriver::vector::Vector;
     ///
     /// let vec = Vector::new(vec![1.0,2.0,3.0,4.0]);
     /// ```
@@ -38,8 +38,8 @@ impl<T> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate rulinalg; fn main() {
-    /// use rulinalg::vector::Vector;
+    /// # #[macro_use] extern crate yjriver; fn main() {
+    /// use yjriver::vector::Vector;
     ///
     /// let v = Vector::from_fn(4, |x| x * 3);
     /// assert_eq!(v, vector![0, 3, 6, 9]);
@@ -168,8 +168,8 @@ impl<T: Copy> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate rulinalg; fn main() {
-    /// use rulinalg::vector::Vector;
+    /// # #[macro_use] extern crate yjriver; fn main() {
+    /// use yjriver::vector::Vector;
     /// fn add_two(a: f64) -> f64 {
     ///     a + 2f64
     /// }
@@ -197,8 +197,8 @@ impl<T: Copy + PartialOrd> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate rulinalg; fn main() {
-    /// use rulinalg::vector::Vector;
+    /// # #[macro_use] extern crate yjriver; fn main() {
+    /// use yjriver::vector::Vector;
     ///
     /// let a = vector![1.0,2.0,0.0,5.0];
     /// let b = a.argmax();
@@ -217,8 +217,8 @@ impl<T: Copy + PartialOrd> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate rulinalg; fn main() {
-    /// use rulinalg::vector::Vector;
+    /// # #[macro_use] extern crate yjriver; fn main() {
+    /// use yjriver::vector::Vector;
     ///
     /// let a = vector![1.0, 2.0, 0.0, 5.0];
     /// let b = a.argmin();
@@ -235,8 +235,8 @@ impl<T: Copy + PartialOrd> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate rulinalg; fn main() {
-    /// use rulinalg::vector::Vector;
+    /// # #[macro_use] extern crate yjriver; fn main() {
+    /// use yjriver::vector::Vector;
     ///
     /// let a = vector![1.0, 2.0, 3.0, 4.0, 5.0];
     ///
@@ -265,7 +265,7 @@ impl<T: Clone + Zero> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// use rulinalg::vector::Vector;
+    /// use yjriver::vector::Vector;
     ///
     /// let vec = Vector::<f64>::zeros(10);
     /// ```
@@ -285,7 +285,7 @@ impl<T: Clone + One> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// use rulinalg::vector::Vector;
+    /// use yjriver::vector::Vector;
     ///
     /// let vec = Vector::<f64>::ones(10);
     /// ```
@@ -303,8 +303,8 @@ impl<T: Copy + Zero + Mul<T, Output = T> + Add<T, Output = T>> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate rulinalg; fn main() {
-    /// use rulinalg::vector::Vector;
+    /// # #[macro_use] extern crate yjriver; fn main() {
+    /// use yjriver::vector::Vector;
     ///
     /// let a = vector![1.0, 2.0, 3.0, 4.0];
     /// let b = vector![2.0; 4];
@@ -326,8 +326,8 @@ impl<T: Copy + Zero + Add<T, Output = T>> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate rulinalg; fn main() {
-    /// use rulinalg::vector::Vector;
+    /// # #[macro_use] extern crate yjriver; fn main() {
+    /// use yjriver::vector::Vector;
     ///
     /// let a = vector![1.0, 2.0, 3.0, 4.0];
     ///
@@ -346,8 +346,8 @@ impl<T: Copy + Mul<T, Output = T>> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate rulinalg; fn main() {
-    /// use rulinalg::vector::Vector;
+    /// # #[macro_use] extern crate yjriver; fn main() {
+    /// use yjriver::vector::Vector;
     ///
     /// let a = vector![1.0, 2.0, 3.0, 4.0];
     /// let b = vector![1.0, 2.0, 3.0, 4.0];
@@ -368,8 +368,8 @@ impl<T: Copy + Div<T, Output = T>> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate rulinalg; fn main() {
-    /// use rulinalg::vector::Vector;
+    /// # #[macro_use] extern crate yjriver; fn main() {
+    /// use yjriver::vector::Vector;
     ///
     /// let a = vector![1.0, 2.0, 3.0, 4.0];
     /// let b = vector![1.0, 2.0, 3.0, 4.0];
@@ -392,8 +392,8 @@ impl<T: Float + FromPrimitive> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate rulinalg; fn main() {
-    /// use rulinalg::vector::Vector;
+    /// # #[macro_use] extern crate yjriver; fn main() {
+    /// use yjriver::vector::Vector;
     ///
     /// let a = vector![1.0, 2.0, 3.0, 4.0];
     ///
@@ -413,8 +413,8 @@ impl<T: Float + FromPrimitive> Vector<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate rulinalg; fn main() {
-    /// use rulinalg::vector::Vector;
+    /// # #[macro_use] extern crate yjriver; fn main() {
+    /// use yjriver::vector::Vector;
     ///
     /// let a = vector![1.0, 2.0, 3.0, 4.0];
     ///
@@ -437,8 +437,7 @@ impl<T: Float + FromPrimitive> Vector<T> {
 #[cfg(test)]
 mod tests {
 
-    use super::super::Vector;
-    use norm::Euclidean;
+    use crate::vector::Vector;
 
     #[test]
     fn test_display() {
@@ -515,14 +514,6 @@ mod tests {
         let c = a.dot(&b);
 
         assert_eq!(c, 63.0);
-    }
-
-    #[test]
-    fn vector_euclidean_norm() {
-        let a = vector![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let b = a.norm(Euclidean);
-
-        assert_eq!(b, (1. + 4. + 9. + 16. + 25. + 36. as f32).sqrt());
     }
 
     #[test]
