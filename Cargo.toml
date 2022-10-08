@@ -9,3 +9,5 @@ description = "A vectorized audio synthesis library."
 repository = "https://github.com/lupu2022/YangJingRiver.git"
 
 [dependencies]
+num="0.4"
+

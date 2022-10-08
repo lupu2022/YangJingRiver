@@ -1,14 +1,7 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+// third party library.
+extern crate num as libnum;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+// macros should be at the top in order for macros to be accessible in subsequent modules
+// #[macro_use]
+pub mod vector;
+pub mod utils;
