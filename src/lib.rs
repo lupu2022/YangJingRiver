@@ -6,3 +6,6 @@ extern crate num as libnum;
 pub mod macros;
 pub mod vector;
 pub mod utils;
+pub mod stack;
+
+

@@ -245,7 +245,7 @@ impl_op_assign_vec!(BitXorAssign, BitXor, bitxor, bitxor_assign, "bitwise-xor");
 
 #[cfg(test)]
 mod tests {
-    use super::super::Vector;
+    use crate::vector::Vector;
 
     // *****************************************************
     // Index
