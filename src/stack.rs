@@ -1,13 +1,25 @@
+use std::cell::{RefCell, RefMut};
+use std::collections::HashMap;
+use std::rc::Rc;
+
 use crate::vector::Vector;
 
 type TNT = f32;
 
 #[derive(Debug, PartialEq, Clone)]
+pub struct SharedVector(Rc<RefCell<Vector<TNT>>>);
+
+impl SharedVector {
+    pub fn new(v: Vector<TNT>) -> Self {
+        SharedVector(Rc::new( RefCell::new(v) ))
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum YjrItem {
-    S( String ),            // symbol, used as flag or hash key
-    N( TNT ),               // number
-    V( Vector<TNT> ),       // vector
-    M( Vector<TNT> ),       // matrix
+    S( String ),        // symbol, used as flag or hash key
+    N( TNT ),           // number
+    V( SharedVector ),  // vector
 }
 
 #[derive(Debug)]
@@ -34,12 +46,6 @@ impl YjrItem {
             _ => false,
         }
     }
-    pub fn is_matrix(&self) -> bool {
-        match self {
-            YjrItem::M(_) => true,
-            _ => false,
-        }
-    }
 
     // consuming
     pub fn as_symbol(self) -> String {
@@ -56,17 +62,10 @@ impl YjrItem {
         }
     }
 
-    pub fn as_vector(self) -> Vector<TNT> {
+    pub fn as_vector(self) -> SharedVector {
         match self {
             YjrItem::V(v) => v,
             _ => panic!("Item is not vector")
-        }
-    }
-
-    pub fn as_matrix(self) -> Vector<TNT> {
-        match self {
-            YjrItem::M(v) => v,
-            _ => panic!("Item is not mastrix")
         }
     }
 }
@@ -134,22 +133,17 @@ impl YjrStack {
         self.data.push( item );
     }
 
-    pub fn push_number(&mut self, n: TNT) {
-        let item = YjrItem::N(n);
-        self.data.push(item);
-    }
-
-    pub fn push_vector(&mut self, v: Vector<TNT>) {
-        let item = YjrItem::V(v);
-        self.data.push(item);
-    }
-
     pub fn push_symbol_list(&mut self, sl: Vec<String>) {
         let lsize = sl.len();
         for s in sl {
             self.push_symbol(s);
         }
         self.push_number(lsize as TNT);
+    }
+
+    pub fn push_number(&mut self, n: TNT) {
+        let item = YjrItem::N(n);
+        self.data.push(item);
     }
 
     pub fn push_number_list(&mut self, sl: Vec<TNT>) {
@@ -160,7 +154,12 @@ impl YjrStack {
         self.push_number(lsize as TNT);
     }
 
-    pub fn push_vector_list(&mut self, sl: Vec<Vector<TNT>>) {
+    pub fn push_vector(&mut self, v: SharedVector) {
+        let item = YjrItem::V(v);
+        self.data.push(item);
+    }
+
+    pub fn push_vector_list(&mut self, sl: Vec<SharedVector>) {
         let lsize = sl.len();
         for s in sl {
             self.push_vector(s);
@@ -176,15 +175,15 @@ impl YjrStack {
         self.data.pop().unwrap().as_number()
     }
 
-    pub fn pop_vector(&mut self) -> Vector<TNT> {
+    pub fn pop_vector(&mut self) -> SharedVector {
         self.data.pop().unwrap().as_vector()
     }
 
     pub fn pop_symbol_list(&mut self) -> Vec<String> {
         let lsize = self.pop_number() as usize;
-        let mut ret = Vec::new();
-        for _ in 0..lsize {
-            ret.push( self.pop_symbol() );
+        let mut ret = vec![String::new(); lsize];
+        for i in 0..lsize {
+            ret[lsize - i - 1] = self.pop_symbol();
         }
         return ret;
     }
@@ -198,19 +197,22 @@ impl YjrStack {
         return ret;
     }
 
-    pub fn pop_vector_list(&mut self) -> Vec<Vector<TNT>> {
+    pub fn pop_vector_list(&mut self) -> Vec<SharedVector> {
         let lsize = self.pop_number() as usize;
-        let mut ret = Vec::new();
+        let mut ret = vec![];
         for _ in 0..lsize {
             ret.push( self.pop_vector() );
         }
-        return ret;
+        ret.reverse();
+        ret
     }
+
 }
 
 #[cfg(test)]
 mod tests {
     use crate::stack::YjrStack;
+    use crate::stack::SharedVector;
 
     #[test]
     fn simple_test() {
@@ -220,23 +222,21 @@ mod tests {
         stack.push_symbol("Hello World");
         stack.push_symbol("Hello World".to_string());
 
-        stack.push_vector( vector![1.0, 2.0, 3.0, 4.0, 5.0] );
+        stack.push_vector( SharedVector::new(vector![1.0, 2.0, 3.0, 4.0, 5.0]) );
 
         stack.push_number(1949.0);
         stack.push_number(1979.0);
         stack.push_number(2.0);
 
         let l = stack.pop_number_list();
-        let mut v = stack.pop_vector();
-        v = v.elemul(&v);
+        let v = stack.pop_vector();
         let s = stack.pop_symbol();
 
         stack.push_number_list( vec![1.0, 2.0, 3.0] );
 
-
         println!("{:?}", stack);
         println!("{:?}", l);
-        println!("{:?}", v);
+        println!("{:?}", v.0.borrow() );
         println!("{}", s);
     }
 }
