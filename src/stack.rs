@@ -59,14 +59,14 @@ impl YjrItem {
     pub fn as_vector(self) -> Vector<TNT> {
         match self {
             YjrItem::V(v) => v,
-            _ => panic!("Item is not number")
+            _ => panic!("Item is not vector")
         }
     }
 
     pub fn as_matrix(self) -> Vector<TNT> {
         match self {
             YjrItem::M(v) => v,
-            _ => panic!("Item is not number")
+            _ => panic!("Item is not mastrix")
         }
     }
 }
@@ -191,9 +191,9 @@ impl YjrStack {
 
     pub fn pop_number_list(&mut self) -> Vec<TNT> {
         let lsize = self.pop_number() as usize;
-        let mut ret = Vec::new();
-        for _ in 0..lsize {
-            ret.push( self.pop_number() );
+        let mut ret = vec![0.0; lsize];
+        for i in 0..lsize {
+            ret[lsize - i - 1] = self.pop_number();
         }
         return ret;
     }
@@ -210,7 +210,6 @@ impl YjrStack {
 
 #[cfg(test)]
 mod tests {
-    use crate::vector::Vector;
     use crate::stack::YjrStack;
 
     #[test]
@@ -221,6 +220,23 @@ mod tests {
         stack.push_symbol("Hello World");
         stack.push_symbol("Hello World".to_string());
 
+        stack.push_vector( vector![1.0, 2.0, 3.0, 4.0, 5.0] );
+
+        stack.push_number(1949.0);
+        stack.push_number(1979.0);
+        stack.push_number(2.0);
+
+        let l = stack.pop_number_list();
+        let mut v = stack.pop_vector();
+        v = v.elemul(&v);
+        let s = stack.pop_symbol();
+
+        stack.push_number_list( vec![1.0, 2.0, 3.0] );
+
+
         println!("{:?}", stack);
+        println!("{:?}", l);
+        println!("{:?}", v);
+        println!("{}", s);
     }
 }
