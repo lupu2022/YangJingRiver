@@ -1,10 +1,9 @@
-use std::cell::{RefCell, RefMut};
+use std::cell::{RefCell, RefMut, Ref};
 use std::collections::HashMap;
 use std::rc::Rc;
 
+use crate::TNT;
 use crate::vector::Vector;
-
-type TNT = f32;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct SharedVector(Rc<RefCell<Vector<TNT>>>);
@@ -13,11 +12,19 @@ impl SharedVector {
     pub fn new(v: Vector<TNT>) -> Self {
         SharedVector(Rc::new( RefCell::new(v) ))
     }
+
+    pub fn vec(&self) -> Ref<'_, Vector<TNT>> {
+        self.0.borrow()
+    }
+
+    pub fn vec_mut(&self) -> RefMut<'_, Vector<TNT>> {
+        self.0.borrow_mut()
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum YjrItem {
-    S( String ),        // symbol, used as flag or hash key
+    S( String ),        // string, used as flag or hash key
     N( TNT ),           // number
     V( SharedVector ),  // vector
 }
@@ -28,7 +35,7 @@ pub struct YjrStack {
 }
 
 impl YjrItem {
-    pub fn is_symbol(&self) -> bool {
+    pub fn is_string(&self) -> bool {
         match self {
             YjrItem::S(_) => true,
             _ => false,
@@ -48,10 +55,10 @@ impl YjrItem {
     }
 
     // consuming
-    pub fn as_symbol(self) -> String {
+    pub fn as_string(self) -> String {
         match self {
             YjrItem::S(s) => s,
-            _ => panic!("Item is not symbol")
+            _ => panic!("Item is not string")
         }
     }
 
@@ -128,15 +135,15 @@ impl YjrStack {
         self.data.push(top3);
     }
 
-    pub fn push_symbol<T: ToString>(&mut self, s: T) {
+    pub fn push_string<T: ToString>(&mut self, s: T) {
         let item = YjrItem::S(s.to_string());
         self.data.push( item );
     }
 
-    pub fn push_symbol_list(&mut self, sl: Vec<String>) {
+    pub fn push_string_list(&mut self, sl: Vec<String>) {
         let lsize = sl.len();
         for s in sl {
-            self.push_symbol(s);
+            self.push_string(s);
         }
         self.push_number(lsize as TNT);
     }
@@ -167,8 +174,8 @@ impl YjrStack {
         self.push_number(lsize as TNT);
     }
 
-    pub fn pop_symbol(&mut self) -> String {
-        self.data.pop().unwrap().as_symbol()
+    pub fn pop_string(&mut self) -> String {
+        self.data.pop().unwrap().as_string()
     }
 
     pub fn pop_number(&mut self) -> TNT {
@@ -179,11 +186,11 @@ impl YjrStack {
         self.data.pop().unwrap().as_vector()
     }
 
-    pub fn pop_symbol_list(&mut self) -> Vec<String> {
+    pub fn pop_string_list(&mut self) -> Vec<String> {
         let lsize = self.pop_number() as usize;
         let mut ret = vec![String::new(); lsize];
         for i in 0..lsize {
-            ret[lsize - i - 1] = self.pop_symbol();
+            ret[lsize - i - 1] = self.pop_string();
         }
         return ret;
     }
@@ -206,8 +213,10 @@ impl YjrStack {
         ret.reverse();
         ret
     }
-
 }
+
+pub type YjrHash = HashMap<String, YjrItem>;
+
 
 #[cfg(test)]
 mod tests {
@@ -219,8 +228,8 @@ mod tests {
         let mut stack = YjrStack::new();
 
         stack.push_number(3.14);
-        stack.push_symbol("Hello World");
-        stack.push_symbol("Hello World".to_string());
+        stack.push_string("Hello World");
+        stack.push_string("Hello World".to_string());
 
         stack.push_vector( SharedVector::new(vector![1.0, 2.0, 3.0, 4.0, 5.0]) );
 
@@ -230,13 +239,13 @@ mod tests {
 
         let l = stack.pop_number_list();
         let v = stack.pop_vector();
-        let s = stack.pop_symbol();
+        let s = stack.pop_string();
 
         stack.push_number_list( vec![1.0, 2.0, 3.0] );
 
         println!("{:?}", stack);
         println!("{:?}", l);
-        println!("{:?}", v.0.borrow() );
+        println!("{:?}", v.vec() );
         println!("{}", s);
     }
 }
