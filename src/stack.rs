@@ -53,6 +53,19 @@ impl YjrItem {
             _ => false,
         }
     }
+    pub fn is_none(&self) -> bool {
+        match self {
+            YjrItem::S(v) => {
+                if v == "" {
+                    true
+                } else {
+                    false
+                }
+            },
+            _ => false,
+        }
+    }
+
 
     // consuming
     pub fn as_string(self) -> String {
