@@ -2,6 +2,15 @@ use std::collections::HashMap;
 
 use crate::TNT;
 use crate::stack::{YjrStack, YjrHash};
+use crate::builtin;
+
+#[derive(Debug, PartialEq, Clone)]
+enum WordCode {
+    Number(TNT),
+    Symbol(String),
+    Native(String),
+    User(String),
+}
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 enum WordByte {
@@ -10,56 +19,30 @@ enum WordByte {
     Native(usize),
     User(usize),
 }
-type UserWord = Vec<WordByte>;
+
+type UserWord = Vec<WordCode>;
+type UserBinary = Vec<WordByte>;
+
+pub trait NativeWord  {
+    fn boot(&mut self, stack: &mut YjrStack, local: &mut YjrHash, global: &mut YjrHash);
+    fn tick(&mut self, stack: &mut YjrStack);
+}
 
 pub struct YjrEnviroment {
-    user_words :    Vec<UserWord>,
-    user_words_map: HashMap<String, usize>,
-
-    native_words :  Vec< fn(&mut YjrStack) >,
-    native_words_map: HashMap<String, usize>,
-
-    string_library: Vec< String >,
+    user_words: HashMap<String, UserWord >,
+    native_words: HashMap<String, fn()->Box<dyn NativeWord> >
 }
 
 pub struct YjrRuntime {
     stack:      YjrStack,
-    hash:       Vec<YjrHash>,
-    binary:     UserWord,
+    hash:       Vec< YjrHash>,
+    string:     Vec< String>,
+    binary:     Vec< UserBinary >,
 }
 
 impl YjrEnviroment {
-    pub fn new() -> Self {
-        let mut ret = YjrEnviroment {
-            user_words:     Vec::new(),
-            user_words_map: HashMap::new(),
-            native_words:   Vec::new(),
-            native_words_map: HashMap::new(),
-            string_library: Vec::new(),
-        };
-        ret.string_library.push("".to_string());
-        ret
-    }
-
     fn insert_user_word(&mut self, name: &str, word: UserWord) {
-        if self.user_words_map.get(name).is_some() {
-            panic!("Can't define word with same name");
-        }
-
-        let n = self.user_words.len();
-        self.user_words_map.insert(name.to_string(), n);
-        self.user_words.push( word );
-    }
-
-    fn get_string_index(&mut self, s: &str) -> usize {
-        for i in 0..self.string_library.len() {
-            if self.string_library[i].as_str() == s {
-                return i
-            }
-        }
-        let ret = self.string_library.len();
-        self.string_library.push(s.to_string());
-        ret
+        self.user_words.insert(name.to_string(), word);
     }
 
     fn compile(&mut self, code: &str) -> UserWord {
@@ -116,7 +99,7 @@ impl YjrEnviroment {
             let token = token.as_str();
 
             // first pass, processing command primitive
-            let mut new_byte: WordByte = if token == "#def" {
+            let mut new_code: WordCode = if token == "#def" {
                 if !word_code.is_none() {
                     panic!("Can't define new word inside a word.");
                 }
@@ -144,13 +127,13 @@ impl YjrEnviroment {
                     if w.len() == 0 {
                         panic!("#loop macro without loop number!");
                     }
-                    if let WordByte::Number(ln) = w[0] {
+                    if let WordCode::Number(ln) = w[0] {
                         if ln.fract() != 0.0 {
                             panic!("Loop count must be a integer");
                         }
                         for _ in 0.. (ln as usize) {
                             for i in 1..w.len() {
-                                main_code.push( w[i] );
+                                main_code.push( w[i].clone() );
                             }
                         }
                     } else {
@@ -165,16 +148,15 @@ impl YjrEnviroment {
                     if w.len() == 0 {
                         panic!("#define macro without word name!");
                     }
-                    if let WordByte::Symbol(s) = w[0] {
-                        let s = self.string_library[s].clone();
+                    if let WordCode::Symbol(ref s) = w[0] {
                         if s.starts_with("$") {
                             panic!("Word's name can't begin with $");
                         }
                         let mut new_word : UserWord = Vec::new();
                         for i in 1..w.len() {
-                            new_word.push( w[i] );
+                            new_word.push( w[i].clone() );
                         }
-                        self.insert_user_word(&s, new_word);
+                        self.insert_user_word(s, new_word);
                     } else {
                         panic!("First item must be a number in #loop");
                     }
@@ -197,7 +179,7 @@ impl YjrEnviroment {
             } else if token == "]" {
                 if let Some(ln) = list_count {
                     list_count = None;
-                    WordByte::Number( ln as TNT )
+                    WordCode::Number( ln as TNT )
                 } else {
                     panic!("']' list macro appears without begin '['");
                 }
@@ -206,8 +188,7 @@ impl YjrEnviroment {
                 if let Some(ref mut w) = word_code {
                     if w.len() == 0 {
                         if check_symbol(&token) {
-                            let i = self.get_string_index(token);
-                            w.push( WordByte::Symbol(i) );
+                            w.push( WordCode::Symbol(token.to_string()) );
                             continue;
                         } else {
                             panic!("Word name must be a alphabetnumberic");
@@ -217,15 +198,14 @@ impl YjrEnviroment {
 
                 // do some translate in second pass
                 if let Some(n) = check_number( token) {
-                    WordByte::Number(n)
+                    WordCode::Number(n)
                 } else {
-                    let i = self.get_string_index(token);
-                    WordByte::Symbol(i)
+                    WordCode::Symbol(token.to_string())
                 }
             };
 
             // second pass: translate symbol to native or user word.
-            let mut push_byte = |x: WordByte| {
+            let mut push_byte = |x: WordCode| {
                 if let Some(ref mut uw) = loop_code {
                     uw.push(x);
                     return;
@@ -237,47 +217,47 @@ impl YjrEnviroment {
                 main_code.push(x);
             };
 
-            let mut symbol = match new_byte {
-                WordByte::Number(_) => {
-                    push_byte(new_byte);
+            let mut symbol = match &new_code {
+                WordCode::Number(_) => {
+                    push_byte(new_code.clone());
                     continue;
                 },
-                WordByte::Symbol(n) => {
-                    self.string_library[n].clone()
+                WordCode::Symbol(s) => {
+                    s.clone()
                 },
                 _ => {
-                    panic!("new_byte must a symbol or number after first pass")
+                    panic!("new_code must a symbol or number after first pass")
                 }
             };
 
             // checking is a keyword
             if symbol == "true" {
-                new_byte = WordByte::Number(1.0);
-                push_byte(new_byte);
+                new_code = WordCode::Number(1.0);
+                push_byte(new_code);
                 continue;
             }
             if symbol == "false" {
-                new_byte = WordByte::Number(0.0);
-                push_byte(new_byte);
+                new_code = WordCode::Number(0.0);
+                push_byte(new_code);
                 continue;
             }
             if symbol == "null" {
-                new_byte = WordByte::Symbol(0);
-                push_byte(new_byte);
+                new_code = WordCode::Symbol("".to_string());
+                push_byte(new_code);
                 continue;
             }
 
             // checking is a native word
-            if let Some(n) = self.native_words_map.get(&symbol) {
-                new_byte = WordByte::Native(*n);
-                push_byte(new_byte);
+            if self.native_words.get(&symbol).is_some() {
+                new_code = WordCode::Native(symbol.clone());
+                push_byte(new_code);
                 continue;
             }
 
             // checking is a user word
-            if let Some(n) = self.user_words_map.get(&symbol) {
-                new_byte = WordByte::User(*n);
-                push_byte(new_byte);
+            if self.user_words.get(&symbol).is_some() {
+                new_code = WordCode::User(symbol.clone());
+                push_byte(new_code);
                 continue;
             }
 
@@ -287,7 +267,7 @@ impl YjrEnviroment {
                 if !check_symbol( &symbol ) {
                     panic!("Symbol must include alphanumbric or '_'");
                 }
-                push_byte(new_byte);
+                push_byte(new_code);
                 continue;
             }
 
@@ -301,7 +281,21 @@ impl YjrEnviroment {
         main_code
     }
 
-    pub fn build(&self, code: &str ) -> YjrRuntime {
+    pub fn new() -> Self {
+        let mut ret = YjrEnviroment {
+            user_words: HashMap::new(),
+            native_words: HashMap::new(),
+        };
+        builtin::load_builtin(&mut ret);
+        ret
+    }
+
+    pub fn insert_native_word(&mut self, name: &str, word: fn() -> Box<dyn NativeWord>) {
+        self.native_words.insert(name.to_string(), word);
+    }
+
+    pub fn build(&mut self, code: &str ) -> YjrRuntime {
+        let binary = self.compile(code);
         todo!()
     }
 
@@ -312,15 +306,10 @@ impl YjrEnviroment {
 
 #[cfg(test)]
 mod tests {
-    use crate::syntax::YjrEnviroment;
+    use crate::runtime::YjrEnviroment;
 
     #[test]
     fn simple_test() {
-        let mut env = YjrEnviroment::new();
-        let code = "3.14 'kaka' goto";
-        env.compile(code);
     }
 }
-
-
 
