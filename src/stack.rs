@@ -35,6 +35,10 @@ pub struct YjrStack {
 }
 
 impl YjrItem {
+    pub fn new() -> Self {
+        YjrItem::S("".to_string())
+    }
+
     pub fn is_string(&self) -> bool {
         match self {
             YjrItem::S(_) => true,
@@ -228,8 +232,29 @@ impl YjrStack {
     }
 }
 
-pub type YjrHash = HashMap<String, YjrItem>;
+pub struct YjrHash {
+    maps:   Vec< HashMap<String, YjrItem>>,
+    target: usize,
+}
 
+impl YjrHash {
+    pub fn new() -> Self {
+        YjrHash {
+            maps:       Vec::new(),
+            target:     0,
+        }
+    }
+    pub fn push(&mut self) {
+        self.maps.push( HashMap::new() );
+    }
+    pub fn moveto(&mut self, i: usize) {
+        if i < self.maps.len() {
+            self.target = i;
+        } else {
+            panic!("Hash is out of range!");
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {

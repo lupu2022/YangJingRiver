@@ -24,7 +24,7 @@ type UserWord = Vec<WordCode>;
 type UserBinary = Vec<WordByte>;
 
 pub trait NativeWord  {
-    fn boot(&mut self, stack: &mut YjrStack, word_id: usize);
+    fn boot(&mut self, stack: &mut YjrStack, hash: &mut YjrHash);
     fn tick(&mut self, stack: &mut YjrStack);
 }
 
@@ -311,9 +311,10 @@ impl YjrEnviroment {
     }
 }
 
+
 pub struct YjrRuntime {
-    pub stack:       YjrStack,
-    pub hashs:       Vec< YjrHash>,
+    pub stack:   YjrStack,
+    pub hash:    YjrHash,
     strings:     Vec< String>,
     binarys:     Vec< UserBinary >,
     natives:     Vec< Box<dyn NativeWord> >,
@@ -334,7 +335,7 @@ impl YjrRuntime {
     fn linking(&mut self, env: &YjrEnviroment, main_code: &UserWord) {
         let id:usize = self.binarys.len();
         self.binarys.push( Vec::new());
-        self.hashs.push( HashMap::new() );
+        self.hash.push();
 
         let mut bin = Vec::new();
         for code in main_code {
@@ -363,7 +364,7 @@ impl YjrRuntime {
     fn new(env: &YjrEnviroment, main_code: &UserWord) -> Self {
         let mut rt = YjrRuntime {
             stack: YjrStack::new(),
-            hashs:  Vec::new(),
+            hash:  YjrHash::new(),
             strings: Vec::new(),
             binarys: Vec::new(),
             natives: Vec::new(),
@@ -373,9 +374,10 @@ impl YjrRuntime {
         rt
     }
 
-    pub fn boot(&mut self, i: usize) {
-        let word = self.binarys[i].clone();
-        for w in word {
+    fn boot_(&mut self, i: usize) {
+        self.hash.moveto(i);
+        for j in 0..self.binarys[i].len() {
+            let w = self.binarys[i][j].clone();
             match w {
                 WordByte::Number(n) => {
                     self.stack.push_number(n);
@@ -384,19 +386,23 @@ impl YjrRuntime {
                     self.stack.push_string( self.strings[s].to_string() );
                 },
                 WordByte::Native(n) => {
-                    self.natives[n].boot(&mut self.stack, i);
+                    self.natives[n].boot(&mut self.stack, &mut self.hash);
                 },
                 WordByte::User(w) => {
                     assert!(w == (i + 1));
-                    self.boot(i+1);
+                    self.boot_(i+1);
                 },
             }
         }
     }
+    pub fn boot(&mut self) {
+        self.boot_(0);
+    }
 
-    pub fn tick(&mut self, i: usize) {
-        let word = self.binarys[i].clone();
-        for w in word {
+    fn tick_(&mut self, i: usize) {
+        self.hash.moveto(i);
+        for j in 0..self.binarys[i].len() {
+            let w = self.binarys[i][j].clone();
             match w {
                 WordByte::Number(n) => {
                     self.stack.push_number(n);
@@ -409,11 +415,15 @@ impl YjrRuntime {
                 },
                 WordByte::User(w) => {
                     assert!(w == (i + 1));
-                    self.tick(i+1);
+                    self.tick_(i+1);
                 },
             }
         }
     }
+    pub fn tick(&mut self) {
+        self.tick_(0);
+    }
+
 }
 
 #[cfg(test)]
