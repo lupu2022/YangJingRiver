@@ -139,6 +139,8 @@ impl<'a, 'b, T: Copy + $trt<T, Output = T>> $trt<&'b Vector<T>> for &'a Vector<T
 impl_bin_op_vector!(Add, add, +, "addition");
 impl_bin_op_vector!(Sub, sub, -, "subtraction");
 impl_bin_op_vector!(Rem, rem, %, "remainder");
+impl_bin_op_vector!(Mul, mul, *, "multiplication");
+impl_bin_op_vector!(Div, div, /, "division");
 impl_bin_op_vector!(BitAnd, bitand, &, "bitwise-and");
 impl_bin_op_vector!(BitOr, bitor, |, "bitwise-or");
 impl_bin_op_vector!(BitXor, bitxor, ^, "bitwise-xor");
