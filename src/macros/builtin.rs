@@ -8,7 +8,7 @@ macro_rules! builtin_binary_op {
             }
         }
         impl NativeWord for $name {
-            fn boot(&mut self, stack: &mut YjrStack, local_: &mut YjrHash, global_: &mut YjrHash) {
+            fn boot(&mut self, stack: &mut YjrStack, _word_id: usize) {
                 self.tick(stack);
             }
 

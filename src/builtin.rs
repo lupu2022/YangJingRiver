@@ -1,6 +1,6 @@
-use crate::TNT;
+//use crate::TNT;
 use crate::stack::{YjrStack, YjrHash, SharedVector};
-use crate::runtime::{YjrEnviroment, NativeWord};
+use crate::runtime::{YjrEnviroment, YjrRuntime, NativeWord};
 
 builtin_binary_op!{Add , +}
 builtin_binary_op!{Sub , -}

@@ -24,7 +24,7 @@ type UserWord = Vec<WordCode>;
 type UserBinary = Vec<WordByte>;
 
 pub trait NativeWord  {
-    fn boot(&mut self, stack: &mut YjrStack, local: &mut YjrHash, global: &mut YjrHash);
+    fn boot(&mut self, stack: &mut YjrStack, word_id: usize);
     fn tick(&mut self, stack: &mut YjrStack);
 }
 
@@ -33,19 +33,12 @@ pub struct YjrEnviroment {
     native_words: HashMap<String, fn()->Box<dyn NativeWord> >
 }
 
-pub struct YjrRuntime {
-    stack:      YjrStack,
-    hash:       Vec< YjrHash>,
-    string:     Vec< String>,
-    binary:     Vec< UserBinary >,
-}
-
 impl YjrEnviroment {
     fn insert_user_word(&mut self, name: &str, word: UserWord) {
         self.user_words.insert(name.to_string(), word);
     }
 
-    fn compile(&mut self, code: &str) -> UserWord {
+    fn compile(&mut self, txt: &str) -> UserWord {
         fn tokenize(expr: &str) -> Vec<String> {
             expr.replace("\n", " ")
                 .replace("{", " ")
@@ -59,9 +52,9 @@ impl YjrEnviroment {
                 .collect()
         }
 
-        fn remove_comment(code: &str) -> String {
+        fn remove_comment(txt: &str) -> String {
             let mut contents = "".to_string();
-            for line in code.lines() {
+            for line in txt.lines() {
                 let mut line = line.to_string();
                 if let Some(pos) = line.find(";") {
                     let (code, _) = line.split_at(pos);
@@ -88,7 +81,7 @@ impl YjrEnviroment {
             return None;
         }
 
-        let tokens = tokenize( &remove_comment(code) );
+        let tokens = tokenize( &remove_comment(txt) );
 
         let mut main_code: UserWord = Vec::new();
         let mut word_code: Option<UserWord> = None;
@@ -171,7 +164,7 @@ impl YjrEnviroment {
                 }
                 if let Some(ref w) = word_code {
                     if w.len() == 0 {
-                        panic!("First item of a word must a symbol named this word!");
+                        panic!("First item of a word must be a word name!");
                     }
                 }
                 list_count = Some(0);
@@ -205,21 +198,23 @@ impl YjrEnviroment {
             };
 
             // second pass: translate symbol to native or user word.
-            let mut push_byte = |x: WordCode| {
+            let mut push_code = |x: WordCode| {
                 if let Some(ref mut uw) = loop_code {
                     uw.push(x);
-                    return;
-                }
-                if let Some(ref mut uw) = word_code {
+                } else if let Some(ref mut uw) = word_code {
                     uw.push(x);
-                    return;
+                } else {
+                    main_code.push(x);
                 }
-                main_code.push(x);
+
+                if let Some(n) = list_count {
+                    list_count = Some(n+1);
+                }
             };
 
             let mut symbol = match &new_code {
                 WordCode::Number(_) => {
-                    push_byte(new_code.clone());
+                    push_code(new_code.clone());
                     continue;
                 },
                 WordCode::Symbol(s) => {
@@ -233,31 +228,31 @@ impl YjrEnviroment {
             // checking is a keyword
             if symbol == "true" {
                 new_code = WordCode::Number(1.0);
-                push_byte(new_code);
+                push_code(new_code);
                 continue;
             }
             if symbol == "false" {
                 new_code = WordCode::Number(0.0);
-                push_byte(new_code);
+                push_code(new_code);
                 continue;
             }
             if symbol == "null" {
                 new_code = WordCode::Symbol("".to_string());
-                push_byte(new_code);
+                push_code(new_code);
                 continue;
             }
 
             // checking is a native word
             if self.native_words.get(&symbol).is_some() {
                 new_code = WordCode::Native(symbol.clone());
-                push_byte(new_code);
+                push_code(new_code);
                 continue;
             }
 
             // checking is a user word
             if self.user_words.get(&symbol).is_some() {
                 new_code = WordCode::User(symbol.clone());
-                push_byte(new_code);
+                push_code(new_code);
                 continue;
             }
 
@@ -267,7 +262,7 @@ impl YjrEnviroment {
                 if !check_symbol( &symbol ) {
                     panic!("Symbol must include alphanumbric or '_'");
                 }
-                push_byte(new_code);
+                push_code(new_code);
                 continue;
             }
 
@@ -279,6 +274,22 @@ impl YjrEnviroment {
         }
 
         main_code
+    }
+
+    fn create_native(&self, name: &str) -> Box<dyn NativeWord> {
+        let ret = self.native_words.get(name);
+        if let Some(f) = ret {
+            return f();
+        }
+        panic!("Can't find native word by name")
+    }
+
+    fn get_user(&self, name: &str) -> &UserWord {
+        let ret = self.user_words.get(name);
+        if let Some(w) = ret {
+            return w
+        }
+        panic!("Can't find native word by name")
     }
 
     pub fn new() -> Self {
@@ -294,13 +305,114 @@ impl YjrEnviroment {
         self.native_words.insert(name.to_string(), word);
     }
 
-    pub fn build(&mut self, code: &str ) -> YjrRuntime {
-        let binary = self.compile(code);
-        todo!()
+    pub fn build(&mut self, txt: &str ) -> YjrRuntime {
+        let main_code = self.compile(txt);
+        YjrRuntime::new(self, &main_code)
+    }
+}
+
+pub struct YjrRuntime {
+    pub stack:       YjrStack,
+    pub hashs:       Vec< YjrHash>,
+    strings:     Vec< String>,
+    binarys:     Vec< UserBinary >,
+    natives:     Vec< Box<dyn NativeWord> >,
+}
+
+impl YjrRuntime {
+    fn string_id(&mut self, s: &str) -> usize {
+        for i in 0..self.strings.len() {
+            if s == &self.strings[i] {
+                return i;
+            }
+        }
+        let ret = self.strings.len();
+        self.strings.push(s.to_string());
+        ret
     }
 
-    pub fn run(&mut self, runtime: &mut YjrRuntime) {
-        todo!()
+    fn linking(&mut self, env: &YjrEnviroment, main_code: &UserWord) {
+        let id:usize = self.binarys.len();
+        self.binarys.push( Vec::new());
+        self.hashs.push( HashMap::new() );
+
+        let mut bin = Vec::new();
+        for code in main_code {
+            match code {
+                WordCode::Number(n) => {
+                    bin.push( WordByte::Number(*n) );
+                },
+                WordCode::Symbol(s) => {
+                    bin.push( WordByte::Symbol(self.string_id(s)) );
+                },
+                WordCode::Native(s) => {
+                    bin.push( WordByte::Native( self.natives.len() ) );
+                    self.natives.push( env.create_native(s) );
+                },
+                WordCode::User(s) => {
+                    bin.push( WordByte::User( self.binarys.len() ) );
+                    let uw = env.get_user(s);
+                    self.linking(env, uw);
+                },
+            }
+        }
+
+        self.binarys[id] = bin;
+    }
+
+    fn new(env: &YjrEnviroment, main_code: &UserWord) -> Self {
+        let mut rt = YjrRuntime {
+            stack: YjrStack::new(),
+            hashs:  Vec::new(),
+            strings: Vec::new(),
+            binarys: Vec::new(),
+            natives: Vec::new(),
+        };
+
+        rt.linking(env, main_code);
+        rt
+    }
+
+    pub fn boot(&mut self, i: usize) {
+        let word = self.binarys[i].clone();
+        for w in word {
+            match w {
+                WordByte::Number(n) => {
+                    self.stack.push_number(n);
+                },
+                WordByte::Symbol(s) => {
+                    self.stack.push_string( self.strings[s].to_string() );
+                },
+                WordByte::Native(n) => {
+                    self.natives[n].boot(&mut self.stack, i);
+                },
+                WordByte::User(w) => {
+                    assert!(w == (i + 1));
+                    self.boot(i+1);
+                },
+            }
+        }
+    }
+
+    pub fn tick(&mut self, i: usize) {
+        let word = self.binarys[i].clone();
+        for w in word {
+            match w {
+                WordByte::Number(n) => {
+                    self.stack.push_number(n);
+                },
+                WordByte::Symbol(s) => {
+                    self.stack.push_string( self.strings[s].to_string() );
+                },
+                WordByte::Native(n) => {
+                    self.natives[n].tick(&mut self.stack);
+                },
+                WordByte::User(w) => {
+                    assert!(w == (i + 1));
+                    self.tick(i+1);
+                },
+            }
+        }
     }
 }
 
