@@ -152,6 +152,10 @@ impl YjrStack {
         self.data.push(top3);
     }
 
+    pub fn push(&mut self, item: YjrItem) {
+        self.data.push( item );
+    }
+
     pub fn push_string<T: ToString>(&mut self, s: T) {
         let item = YjrItem::S(s.to_string());
         self.data.push( item );
@@ -244,7 +248,7 @@ impl YjrHash {
             target:     0,
         }
     }
-    pub fn push(&mut self) {
+    pub fn inc(&mut self) {
         self.maps.push( HashMap::new() );
     }
     pub fn moveto(&mut self, i: usize) {
@@ -253,6 +257,9 @@ impl YjrHash {
         } else {
             panic!("Hash is out of range!");
         }
+    }
+    pub fn get(&self, _name: &str) -> YjrItem {
+        todo!()
     }
 }
 

@@ -8,11 +8,7 @@ macro_rules! builtin_binary_op {
             }
         }
         impl NativeWord for $name {
-            fn boot(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
-                self.tick(stack);
-            }
-
-            fn tick(&mut self, stack: &mut YjrStack) {
+            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
                 if stack.top().is_vector() {
                     let a = stack.pop_vector();
                     if stack.top().is_vector() {

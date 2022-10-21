@@ -8,20 +8,17 @@ builtin_binary_op!{Mod , %}
 builtin_binary_op!{Mul , *}
 builtin_binary_op!{Div , /}
 
-struct Get {
-    item: YjrItem
-}
+struct Get {}
 impl Get {
     pub fn new() -> Box<dyn NativeWord> {
-        Box::new(Get{
-            item: YjrItem::new(),
-        })
+        Box::new(Get{})
     }
 }
 impl NativeWord for Get {
-    fn boot(&mut self, stack: &mut YjrStack, hash: &mut YjrHash) {
-    }
-    fn tick(&mut self, stack: &mut YjrStack) {
+    fn run(&mut self, stack: &mut YjrStack, hash: &mut YjrHash) {
+        let name = stack.pop_string();
+        let item: YjrItem = hash.get(&name);
+        stack.push(item);
     }
 }
 

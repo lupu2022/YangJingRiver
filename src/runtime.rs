@@ -24,8 +24,7 @@ type UserWord = Vec<WordCode>;
 type UserBinary = Vec<WordByte>;
 
 pub trait NativeWord  {
-    fn boot(&mut self, stack: &mut YjrStack, hash: &mut YjrHash);
-    fn tick(&mut self, stack: &mut YjrStack);
+    fn run(&mut self, stack: &mut YjrStack, hash: &mut YjrHash);
 }
 
 pub struct YjrEnviroment {
@@ -335,7 +334,7 @@ impl YjrRuntime {
     fn linking(&mut self, env: &YjrEnviroment, main_code: &UserWord) {
         let id:usize = self.binarys.len();
         self.binarys.push( Vec::new());
-        self.hash.push();
+        self.hash.inc();
 
         let mut bin = Vec::new();
         for code in main_code {
@@ -374,7 +373,7 @@ impl YjrRuntime {
         rt
     }
 
-    fn boot_(&mut self, i: usize) {
+    fn run_(&mut self, i: usize) {
         self.hash.moveto(i);
         for j in 0..self.binarys[i].len() {
             let w = self.binarys[i][j].clone();
@@ -386,44 +385,18 @@ impl YjrRuntime {
                     self.stack.push_string( self.strings[s].to_string() );
                 },
                 WordByte::Native(n) => {
-                    self.natives[n].boot(&mut self.stack, &mut self.hash);
+                    self.natives[n].run(&mut self.stack, &mut self.hash);
                 },
                 WordByte::User(w) => {
                     assert!(w == (i + 1));
-                    self.boot_(i+1);
+                    self.run_(i+1);
                 },
             }
         }
     }
-    pub fn boot(&mut self) {
-        self.boot_(0);
+    pub fn run(&mut self) {
+        self.run_(0);
     }
-
-    fn tick_(&mut self, i: usize) {
-        self.hash.moveto(i);
-        for j in 0..self.binarys[i].len() {
-            let w = self.binarys[i][j].clone();
-            match w {
-                WordByte::Number(n) => {
-                    self.stack.push_number(n);
-                },
-                WordByte::Symbol(s) => {
-                    self.stack.push_string( self.strings[s].to_string() );
-                },
-                WordByte::Native(n) => {
-                    self.natives[n].tick(&mut self.stack);
-                },
-                WordByte::User(w) => {
-                    assert!(w == (i + 1));
-                    self.tick_(i+1);
-                },
-            }
-        }
-    }
-    pub fn tick(&mut self) {
-        self.tick_(0);
-    }
-
 }
 
 #[cfg(test)]
