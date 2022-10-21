@@ -3,7 +3,7 @@
 //! Contains support methods for linear algebra structs.
 
 use std::cmp;
-use libnum::Zero;
+use libnum::{Zero, Float};
 use std::ops::{Add, Mul, Sub, Div};
 
 /// Compute dot product of two slices.
@@ -227,6 +227,47 @@ pub fn ele_div<T: Copy + Div<T, Output = T>>(u: &[T], v: &[T]) -> Vec<T> {
     vec_bin_op(u, v, |x, y| x / y)
 }
 
+/// Vectorized unary operation applied to one slices.
+///
+/// # Examples
+///
+/// ```
+/// use yjriver::utils;
+///
+/// let mut a = vec![2.0; 10];
+///
+/// let c = utils::vec_unary_op(&a, |x| { x * 2.0 });
+///
+/// // Will print a vector of `4`s.
+/// println!("{:?}", a);
+/// ```
+pub fn vec_unary_op<F, T>(u: &[T], f: F) -> Vec<T>
+    where F: Fn(T) -> T,
+          T: Copy
+{
+    let len = u.len();
+
+    let xs = &u[..len];
+
+    let mut out_vec = Vec::with_capacity(len);
+    unsafe {
+        out_vec.set_len(len);
+    }
+
+    {
+        let out_slice = &mut out_vec[..len];
+
+        for i in 0..len {
+            out_slice[i] = f(xs[i]);
+        }
+    }
+
+    out_vec
+}
+
+pub fn ele_sin<T: Copy + Float>(u: &[T]) -> Vec<T> {
+    vec_unary_op(u, |x| x.sin())
+}
 
 /// Find argmax of slice.
 ///

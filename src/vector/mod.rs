@@ -5,6 +5,7 @@
 
 mod impl_ops;
 mod impl_vec;
+mod utils;
 
 /// The Vector struct.
 ///

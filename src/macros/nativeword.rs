@@ -67,3 +67,21 @@ macro_rules! math_vector_number_op {
     }
 }
 
+#[macro_export]
+macro_rules! math_vector_unary_op {
+    ($name:ident, $op:ident) => {
+        struct $name {}
+        impl $name {
+            pub fn new()->Box<dyn NativeWord> {
+                Box::new($name {})
+            }
+        }
+        impl NativeWord for $name {
+            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+                let a = stack.pop_vector();
+                stack.push_number(b);
+            }
+        }
+    }
+}
+

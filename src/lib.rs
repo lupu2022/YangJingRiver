@@ -8,7 +8,6 @@ pub type TNT = f32;
 #[macro_use]
 mod macros;
 
-mod utils;
 mod base;
 mod math;
 pub mod vector;

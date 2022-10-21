@@ -5,8 +5,7 @@ use std::iter::FromIterator;
 use std::slice::{Iter, IterMut};
 use std::vec::IntoIter;
 
-use crate::utils;
-
+use super::utils;
 use super::Vector;
 
 impl<T> Vector<T> {
@@ -432,7 +431,14 @@ impl<T: Float + FromPrimitive> Vector<T> {
 
         var / FromPrimitive::from_usize(self.size() - 1).unwrap()
     }
+
+    pub fn sin(&self) -> Vector<T> {
+        let new_data = utils::ele_sin(&self.data);
+        Vector::new(new_data)
+    }
 }
+
+
 
 #[cfg(test)]
 mod tests {

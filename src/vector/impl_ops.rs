@@ -3,8 +3,8 @@ use std::ops::{Mul, Add, Div, Sub, Rem,
                Neg, Not,
                BitAnd, BitOr, BitXor, BitAndAssign, BitOrAssign, BitXorAssign,
                Index, IndexMut};
-use crate::utils;
 
+use super::utils;
 use super::Vector;
 
 /// Indexes vector.
