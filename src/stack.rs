@@ -261,6 +261,9 @@ impl YjrHash {
     pub fn get(&self, _name: &str) -> YjrItem {
         todo!()
     }
+    pub fn set(&self, _name: &str, _item: YjrItem) {
+        todo!()
+    }
 }
 
 #[cfg(test)]

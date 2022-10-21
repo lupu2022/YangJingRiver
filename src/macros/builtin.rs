@@ -30,3 +30,20 @@ macro_rules! builtin_binary_op {
     }
 }
 
+#[macro_export]
+macro_rules! builtin_stack_op {
+    ($name:ident, $op:ident) => {
+        struct $name {}
+        impl $name {
+            pub fn new()->Box<dyn NativeWord> {
+                Box::new($name {})
+            }
+        }
+        impl NativeWord for $name {
+            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+                stack.$op();
+            }
+        }
+    }
+}
+
