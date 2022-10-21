@@ -4,19 +4,9 @@
 
 use std::cmp;
 use libnum::{Zero, Float};
-use std::ops::{Add, Mul, Sub, Div};
+use std::ops::{Add, Mul, Div};
 
 /// Compute dot product of two slices.
-///
-/// # Examples
-///
-/// ```
-/// use yjriver::utils;
-/// let a = vec![1.0, 2.0, 3.0, 4.0];
-/// let b = vec![1.0, 2.0, 3.0, 4.0];
-///
-/// let c = utils::dot(&a,&b);
-/// ```
 pub fn dot<T: Copy + Zero + Add<T, Output = T> + Mul<T, Output = T>>(u: &[T], v: &[T]) -> T {
     let len = cmp::min(u.len(), v.len());
     let mut xs = &u[..len];
@@ -89,19 +79,6 @@ pub fn unrolled_sum<T>(mut xs: &[T]) -> T
 /// The first argument should be a mutable slice which will
 /// be modified in place to prevent new memory allocation.
 ///
-/// # Examples
-///
-/// ```
-/// use yjriver::utils;
-///
-/// let mut a = vec![2.0; 10];
-/// let b = vec![3.0; 10];
-///
-/// utils::in_place_vec_bin_op(&mut a, &b, |x, &y| { *x = 1f64 + *x * y });
-///
-/// // Will print a vector of `7`s.
-/// println!("{:?}", a);
-/// ```
 pub fn in_place_vec_bin_op<F, T>(u: &mut [T], v: &[T], mut f: F)
     where F: FnMut(&mut T, &T),
           T: Copy
@@ -119,19 +96,6 @@ pub fn in_place_vec_bin_op<F, T>(u: &mut [T], v: &[T], mut f: F)
 
 /// Vectorized binary operation applied to two slices.
 ///
-/// # Examples
-///
-/// ```
-/// use yjriver::utils;
-///
-/// let mut a = vec![2.0; 10];
-/// let b = vec![3.0; 10];
-///
-/// let c = utils::vec_bin_op(&a, &b, |x, y| { 1f64 + x * y });
-///
-/// // Will print a vector of `7`s.
-/// println!("{:?}", a);
-/// ```
 pub fn vec_bin_op<F, T>(u: &[T], v: &[T], f: F) -> Vec<T>
     where F: Fn(T, T) -> T,
           T: Copy
@@ -158,19 +122,9 @@ pub fn vec_bin_op<F, T>(u: &[T], v: &[T], f: F) -> Vec<T>
     out_vec
 }
 
+/*
 /// Compute vector sum of two slices.
 ///
-/// # Examples
-///
-/// ```
-/// use yjriver::utils;
-/// let a = vec![1.0, 2.0, 3.0, 4.0];
-/// let b = vec![1.0, 2.0, 3.0, 4.0];
-///
-/// let c = utils::vec_sum(&a,&b);
-///
-/// assert_eq!(c, vec![2.0, 4.0, 6.0, 8.0]);
-/// ```
 pub fn vec_sum<T: Copy + Add<T, Output = T>>(u: &[T], v: &[T]) -> Vec<T> {
     vec_bin_op(u, v, |x, y| x + y)
 }
@@ -178,69 +132,25 @@ pub fn vec_sum<T: Copy + Add<T, Output = T>>(u: &[T], v: &[T]) -> Vec<T> {
 
 /// Compute vector difference two slices.
 ///
-/// # Examples
-///
-/// ```
-/// use yjriver::utils;
-/// let a = vec![1.0, 2.0, 3.0, 4.0];
-/// let b = vec![1.0, 2.0, 3.0, 4.0];
-///
-/// let c = utils::vec_sub(&a,&b);
-///
-/// assert_eq!(c, vec![0.0; 4]);
-/// ```
 pub fn vec_sub<T: Copy + Sub<T, Output = T>>(u: &[T], v: &[T]) -> Vec<T> {
     vec_bin_op(u, v, |x, y| x - y)
 }
+*/
 
 /// Computes elementwise multiplication.
 ///
-/// # Examples
-///
-/// ```
-/// use yjriver::utils;
-/// let a = vec![1.0, 2.0, 3.0, 4.0];
-/// let b = vec![1.0, 2.0, 3.0, 4.0];
-///
-/// let c = utils::ele_mul(&a,&b);
-///
-/// assert_eq!(c, vec![1.0, 4.0, 9.0, 16.0]);
-/// ```
 pub fn ele_mul<T: Copy + Mul<T, Output = T>>(u: &[T], v: &[T]) -> Vec<T> {
     vec_bin_op(u, v, |x, y| x * y)
 }
 
 /// Computes elementwise division.
 ///
-/// # Examples
-///
-/// ```
-/// use yjriver::utils;
-/// let a = vec![1.0, 2.0, 3.0, 4.0];
-/// let b = vec![1.0, 2.0, 3.0, 4.0];
-///
-/// let c = utils::ele_div(&a,&b);
-///
-/// assert_eq!(c, vec![1.0; 4]);
-/// ```
 pub fn ele_div<T: Copy + Div<T, Output = T>>(u: &[T], v: &[T]) -> Vec<T> {
     vec_bin_op(u, v, |x, y| x / y)
 }
 
 /// Vectorized unary operation applied to one slices.
 ///
-/// # Examples
-///
-/// ```
-/// use yjriver::utils;
-///
-/// let mut a = vec![2.0; 10];
-///
-/// let c = utils::vec_unary_op(&a, |x| { x * 2.0 });
-///
-/// // Will print a vector of `4`s.
-/// println!("{:?}", a);
-/// ```
 pub fn vec_unary_op<F, T>(u: &[T], f: F) -> Vec<T>
     where F: Fn(T) -> T,
           T: Copy
@@ -265,24 +175,22 @@ pub fn vec_unary_op<F, T>(u: &[T], f: F) -> Vec<T>
     out_vec
 }
 
+
+pub fn ele_exp<T: Copy + Float>(u: &[T]) -> Vec<T> {
+    vec_unary_op(u, |x| x.exp())
+}
+pub fn ele_ln<T: Copy + Float>(u: &[T]) -> Vec<T> {
+    vec_unary_op(u, |x| x.ln())
+}
 pub fn ele_sin<T: Copy + Float>(u: &[T]) -> Vec<T> {
     vec_unary_op(u, |x| x.sin())
+}
+pub fn ele_cos<T: Copy + Float>(u: &[T]) -> Vec<T> {
+    vec_unary_op(u, |x| x.cos())
 }
 
 /// Find argmax of slice.
 ///
-/// Returns index of first occuring maximum.
-///
-/// # Examples
-///
-/// ```
-/// use yjriver::utils;
-/// let a = vec![1.0, 2.0, 3.0, 4.0];
-///
-/// let c = utils::argmax(&a);
-/// assert_eq!(c.0, 3);
-/// assert_eq!(c.1, 4.0);
-/// ```
 pub fn argmax<T>(u: &[T]) -> (usize, T)
     where T: Copy + PartialOrd
 {
@@ -304,17 +212,6 @@ pub fn argmax<T>(u: &[T]) -> (usize, T)
 /// Find argmin of slice.
 ///
 /// Returns index of first occuring minimum.
-///
-/// # Examples
-///
-/// ```
-/// use yjriver::utils;
-/// let a = vec![5.0, 2.0, 3.0, 4.0];
-///
-/// let c = utils::argmin(&a);
-/// assert_eq!(c.0, 1);
-/// assert_eq!(c.1, 2.0);
-/// ```
 pub fn argmin<T>(u: &[T]) -> (usize, T)
     where T: Copy + PartialOrd
 {
@@ -333,19 +230,10 @@ pub fn argmin<T>(u: &[T]) -> (usize, T)
     (min_index, min)
 }
 
+/*
 /// Find index of value in slice.
 ///
 /// Returns index of first occuring value.
-///
-/// # Examples
-///
-/// ```
-/// use yjriver::utils;
-/// let a = vec![1.0, 2.0, 3.0, 4.0];
-///
-/// let c = utils::find(&a, 3.0);
-/// assert_eq!(c, 2);
-/// ```
 pub fn find<T>(p: &[T], u: T) -> usize
     where T: PartialOrd
 {
@@ -357,3 +245,4 @@ pub fn find<T>(p: &[T], u: T) -> usize
 
     panic!("Value not found.")
 }
+*/

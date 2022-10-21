@@ -11,15 +11,6 @@ use super::Vector;
 impl<T> Vector<T> {
     /// Constructor for Vector struct.
     ///
-    /// Requires the vector data.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use yjriver::vector::Vector;
-    ///
-    /// let vec = Vector::new(vec![1.0,2.0,3.0,4.0]);
-    /// ```
     pub fn new<U: Into<Vec<T>>>(data: U) -> Vector<T> {
         let our_data = data.into();
         let size = our_data.len();
@@ -34,16 +25,6 @@ impl<T> Vector<T> {
     /// and constructs a new vector such that `V_i = f(i)`,
     /// where `i` is the index.
     ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate yjriver; fn main() {
-    /// use yjriver::vector::Vector;
-    ///
-    /// let v = Vector::from_fn(4, |x| x * 3);
-    /// assert_eq!(v, vector![0, 3, 6, 9]);
-    /// # }
-    /// ```
     pub fn from_fn<F>(size: usize, mut f: F) -> Vector<T>
         where F: FnMut(usize) -> T {
 
@@ -164,22 +145,6 @@ impl<T: Clone> Clone for Vector<T> {
 impl<T: Copy> Vector<T> {
     /// Applies a function to each element in the vector.
     ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate yjriver; fn main() {
-    /// use yjriver::vector::Vector;
-    /// fn add_two(a: f64) -> f64 {
-    ///     a + 2f64
-    /// }
-    ///
-    /// let a = vector![0.; 4];
-    ///
-    /// let b = a.apply(&add_two);
-    ///
-    /// assert_eq!(b, vector![2.0; 4]);
-    /// # }
-    /// ```
     pub fn apply(mut self, f: &dyn Fn(T) -> T) -> Vector<T> {
         for val in &mut self.data {
             *val = f(*val);
@@ -192,19 +157,6 @@ impl<T: Copy + PartialOrd> Vector<T> {
     /// Find the argmax of the Vector.
     ///
     /// Returns the index of the largest value in the vector.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate yjriver; fn main() {
-    /// use yjriver::vector::Vector;
-    ///
-    /// let a = vector![1.0,2.0,0.0,5.0];
-    /// let b = a.argmax();
-    /// assert_eq!(b.0, 3);
-    /// assert_eq!(b.1, 5.0);
-    /// # }
-    /// ```
     pub fn argmax(&self) -> (usize, T) {
         utils::argmax(&self.data)
     }
@@ -212,39 +164,12 @@ impl<T: Copy + PartialOrd> Vector<T> {
     /// Find the argmin of the Vector.
     ///
     /// Returns the index of the smallest value in the vector.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate yjriver; fn main() {
-    /// use yjriver::vector::Vector;
-    ///
-    /// let a = vector![1.0, 2.0, 0.0, 5.0];
-    /// let b = a.argmin();
-    /// assert_eq!(b.0, 2);
-    /// assert_eq!(b.1, 0.0);
-    /// # }
-    /// ```
     pub fn argmin(&self) -> (usize, T) {
         utils::argmin(&self.data)
     }
 
     /// Select elements from the Vector and form a new Vector from them.
     ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate yjriver; fn main() {
-    /// use yjriver::vector::Vector;
-    ///
-    /// let a = vector![1.0, 2.0, 3.0, 4.0, 5.0];
-    ///
-    /// let a_lower = a.select(&[2, 3, 4]);
-    ///
-    /// // Prints [3,4,5]
-    /// assert_eq!(a_lower, vector![3.0, 4.0, 5.0]);
-    /// # }
-    /// ```
     pub fn select(&self, idxs: &[usize]) -> Vector<T> {
         let mut new_data = Vec::with_capacity(idxs.len());
 
@@ -260,14 +185,6 @@ impl<T: Clone + Zero> Vector<T> {
     /// Constructs Vector of all zeros.
     ///
     /// Requires the size of the vector.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use yjriver::vector::Vector;
-    ///
-    /// let vec = Vector::<f64>::zeros(10);
-    /// ```
     pub fn zeros(size: usize) -> Vector<T> {
         Vector {
             size: size,
@@ -280,14 +197,6 @@ impl<T: Clone + One> Vector<T> {
     /// Constructs Vector of all ones.
     ///
     /// Requires the size of the vector.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use yjriver::vector::Vector;
-    ///
-    /// let vec = Vector::<f64>::ones(10);
-    /// ```
     pub fn ones(size: usize) -> Vector<T> {
         Vector {
             size: size,
@@ -299,19 +208,6 @@ impl<T: Clone + One> Vector<T> {
 impl<T: Copy + Zero + Mul<T, Output = T> + Add<T, Output = T>> Vector<T> {
     /// Compute dot product with specified Vector.
     ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate yjriver; fn main() {
-    /// use yjriver::vector::Vector;
-    ///
-    /// let a = vector![1.0, 2.0, 3.0, 4.0];
-    /// let b = vector![2.0; 4];
-    ///
-    /// let c = a.dot(&b);
-    /// assert_eq!(c, 20.0);
-    /// # }
-    /// ```
     pub fn dot(&self, v: &Vector<T>) -> T {
         utils::dot(&self.data, &v.data)
     }
@@ -320,20 +216,6 @@ impl<T: Copy + Zero + Mul<T, Output = T> + Add<T, Output = T>> Vector<T> {
 impl<T: Copy + Zero + Add<T, Output = T>> Vector<T> {
     /// The sum of the vector.
     ///
-    /// Returns the sum of all elements in the vector.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate yjriver; fn main() {
-    /// use yjriver::vector::Vector;
-    ///
-    /// let a = vector![1.0, 2.0, 3.0, 4.0];
-    ///
-    /// let c = a.sum();
-    /// assert_eq!(c, 10.0);
-    /// # }
-    /// ```
     pub fn sum(&self) -> T {
         utils::unrolled_sum(&self.data[..])
     }
@@ -342,19 +224,6 @@ impl<T: Copy + Zero + Add<T, Output = T>> Vector<T> {
 impl<T: Copy + Mul<T, Output = T>> Vector<T> {
     /// The elementwise product of two vectors.
     ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate yjriver; fn main() {
-    /// use yjriver::vector::Vector;
-    ///
-    /// let a = vector![1.0, 2.0, 3.0, 4.0];
-    /// let b = vector![1.0, 2.0, 3.0, 4.0];
-    ///
-    /// let c = &a.elemul(&b);
-    /// assert_eq!(c, &vector![1.0, 4.0, 9.0, 16.0]);
-    /// # }
-    /// ```
     pub fn elemul(&self, v: &Vector<T>) -> Vector<T> {
         assert_eq!(self.size, v.size);
         Vector::new(utils::ele_mul(&self.data, &v.data))
@@ -364,19 +233,6 @@ impl<T: Copy + Mul<T, Output = T>> Vector<T> {
 impl<T: Copy + Div<T, Output = T>> Vector<T> {
     /// The elementwise division of two vectors.
     ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate yjriver; fn main() {
-    /// use yjriver::vector::Vector;
-    ///
-    /// let a = vector![1.0, 2.0, 3.0, 4.0];
-    /// let b = vector![1.0, 2.0, 3.0, 4.0];
-    ///
-    /// let c = &a.elediv(&b);
-    /// assert_eq!(c, &vector![1.0; 4]);
-    /// # }
-    /// ```
     pub fn elediv(&self, v: &Vector<T>) -> Vector<T> {
         assert_eq!(self.size, v.size);
         Vector::new(utils::ele_div(&self.data, &v.data))
@@ -387,19 +243,6 @@ impl<T: Float + FromPrimitive> Vector<T> {
     /// The mean of the vector.
     ///
     /// Returns the arithmetic mean of the vector.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate yjriver; fn main() {
-    /// use yjriver::vector::Vector;
-    ///
-    /// let a = vector![1.0, 2.0, 3.0, 4.0];
-    ///
-    /// let c = a.mean();
-    /// assert_eq!(c, 2.5);
-    /// # }
-    /// ```
     pub fn mean(&self) -> T {
         let sum = self.sum();
         sum / FromPrimitive::from_usize(self.size()).unwrap()
@@ -408,19 +251,6 @@ impl<T: Float + FromPrimitive> Vector<T> {
     /// The variance of the vector.
     ///
     /// Returns the unbiased sample variance of the vector.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # #[macro_use] extern crate yjriver; fn main() {
-    /// use yjriver::vector::Vector;
-    ///
-    /// let a = vector![1.0, 2.0, 3.0, 4.0];
-    ///
-    /// let c = a.variance();
-    /// assert_eq!(c, 5.0 / 3.0);
-    /// # }
-    /// ```
     pub fn variance(&self) -> T {
         let m = self.mean();
         let mut var = T::zero();
@@ -436,6 +266,19 @@ impl<T: Float + FromPrimitive> Vector<T> {
         let new_data = utils::ele_sin(&self.data);
         Vector::new(new_data)
     }
+    pub fn cos(&self) -> Vector<T> {
+        let new_data = utils::ele_cos(&self.data);
+        Vector::new(new_data)
+    }
+    pub fn exp(&self) -> Vector<T> {
+        let new_data = utils::ele_exp(&self.data);
+        Vector::new(new_data)
+    }
+    pub fn ln(&self) -> Vector<T> {
+        let new_data = utils::ele_ln(&self.data);
+        Vector::new(new_data)
+    }
+
 }
 
 

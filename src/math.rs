@@ -1,6 +1,6 @@
 use crate::TNT;
 use crate::vector::Vector;
-use crate::stack::{YjrStack, YjrHash, YjrItem, SharedVector};
+use crate::stack::{YjrStack, YjrHash, SharedVector};
 use crate::runtime::{YjrEnviroment, NativeWord};
 
 macro_rules! math_vector_number_op {
@@ -94,13 +94,24 @@ macro_rules! math_vector_unary_op {
         }
         impl NativeWord for $name {
             fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
-                let a = stack.pop_vector();
-                stack.push_number(b);
+                if stack.top().is_vector() {
+                    let a = stack.pop_vector();
+                    let b = SharedVector::new( a.vec().$op() );
+                    stack.push_vector(b);
+                } else {
+                    let a = stack.pop_number();
+                    let b = a.$op();
+                    stack.push_number(b);
+                }
             }
         }
     }
 }
 
+math_vector_unary_op!(Sin, sin);
+math_vector_unary_op!(Cos, cos);
+math_vector_unary_op!(Exp, exp);
+math_vector_unary_op!(Ln, ln);
 
 pub fn insert_native_words(env: &mut YjrEnviroment) {
     env.insert_native_word("ones",  Ones::new);
@@ -111,5 +122,10 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
     env.insert_native_word("var",  Var::new);
 
     env.insert_native_word("dot",  Dot::new);
+
+    env.insert_native_word("sin",  Sin::new);
+    env.insert_native_word("cos",  Cos::new);
+    env.insert_native_word("exp",  Exp::new);
+    env.insert_native_word("ln",  Ln::new);
 }
 
