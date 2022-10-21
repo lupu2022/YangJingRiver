@@ -4,5 +4,5 @@
 mod vector;
 
 #[macro_use]
-mod builtin;
+mod nativeword;
 

@@ -9,8 +9,8 @@ pub type TNT = f32;
 mod macros;
 
 mod utils;
-mod builtin;
+mod base;
+mod math;
 pub mod vector;
 pub mod stack;
 pub mod runtime;
-

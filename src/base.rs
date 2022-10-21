@@ -30,20 +30,19 @@ impl NativeWord for Set {
     }
 }
 
-builtin_stack_op!{DropW , drop}
-builtin_stack_op!{Dup , dup}
-builtin_stack_op!{Dup2 , dup2}
-builtin_stack_op!{Swap , swap}
-builtin_stack_op!{Rot , rot}
+base_stack_op!{DropW , drop}
+base_stack_op!{Dup , dup}
+base_stack_op!{Dup2 , dup2}
+base_stack_op!{Swap , swap}
+base_stack_op!{Rot , rot}
 
-builtin_binary_op!{Add , +}
-builtin_binary_op!{Sub , -}
-builtin_binary_op!{Mod , %}
-builtin_binary_op!{Mul , *}
-builtin_binary_op!{Div , /}
+base_binary_op!{Add , +}
+base_binary_op!{Sub , -}
+base_binary_op!{Mod , %}
+base_binary_op!{Mul , *}
+base_binary_op!{Div , /}
 
-
-pub fn load_builtin(env: &mut YjrEnviroment) {
+pub fn insert_native_words(env: &mut YjrEnviroment) {
     // Stack Operator
     env.insert_native_word("drop",  DropW::new);
     env.insert_native_word("dup",  Dup::new);

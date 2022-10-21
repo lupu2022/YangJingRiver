@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use crate::TNT;
 use crate::stack::{YjrStack, YjrHash};
-use crate::builtin;
+use crate::base;
+use crate::math;
 
 #[derive(Debug, PartialEq, Clone)]
 enum WordCode {
@@ -296,7 +297,8 @@ impl YjrEnviroment {
             user_words: HashMap::new(),
             native_words: HashMap::new(),
         };
-        builtin::load_builtin(&mut ret);
+        base::insert_native_words(&mut ret);
+        math::insert_native_words(&mut ret);
         ret
     }
 
