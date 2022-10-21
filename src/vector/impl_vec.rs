@@ -239,6 +239,15 @@ impl<T: Copy + Div<T, Output = T>> Vector<T> {
     }
 }
 
+macro_rules! vec_unary_op_fn (
+    ($fname:ident, $op:ident ) => {
+        pub fn $fname(&self) -> Vector<T> {
+            let new_data = utils::vec_unary_op(&self.data, |x| x.$op());
+            Vector::new(new_data)
+        }
+    }
+);
+
 impl<T: Float + FromPrimitive> Vector<T> {
     /// The mean of the vector.
     ///
@@ -262,23 +271,18 @@ impl<T: Float + FromPrimitive> Vector<T> {
         var / FromPrimitive::from_usize(self.size() - 1).unwrap()
     }
 
-    pub fn sin(&self) -> Vector<T> {
-        let new_data = utils::ele_sin(&self.data);
-        Vector::new(new_data)
-    }
-    pub fn cos(&self) -> Vector<T> {
-        let new_data = utils::ele_cos(&self.data);
-        Vector::new(new_data)
-    }
-    pub fn exp(&self) -> Vector<T> {
-        let new_data = utils::ele_exp(&self.data);
-        Vector::new(new_data)
-    }
-    pub fn ln(&self) -> Vector<T> {
-        let new_data = utils::ele_ln(&self.data);
-        Vector::new(new_data)
-    }
+    vec_unary_op_fn!{abs, abs}
+    vec_unary_op_fn!{ceil, ceil}
+    vec_unary_op_fn!{round, round}
+    vec_unary_op_fn!{floor, floor}
 
+    vec_unary_op_fn!{sin, sin}
+    vec_unary_op_fn!{cos, cos}
+    vec_unary_op_fn!{tan, tan}
+
+    vec_unary_op_fn!{exp, exp}
+    vec_unary_op_fn!{ln, ln}
+    vec_unary_op_fn!{log10, log10}
 }
 
 

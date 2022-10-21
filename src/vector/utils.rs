@@ -3,7 +3,7 @@
 //! Contains support methods for linear algebra structs.
 
 use std::cmp;
-use libnum::{Zero, Float};
+use libnum::{Zero};
 use std::ops::{Add, Mul, Div};
 
 /// Compute dot product of two slices.
@@ -173,20 +173,6 @@ pub fn vec_unary_op<F, T>(u: &[T], f: F) -> Vec<T>
     }
 
     out_vec
-}
-
-
-pub fn ele_exp<T: Copy + Float>(u: &[T]) -> Vec<T> {
-    vec_unary_op(u, |x| x.exp())
-}
-pub fn ele_ln<T: Copy + Float>(u: &[T]) -> Vec<T> {
-    vec_unary_op(u, |x| x.ln())
-}
-pub fn ele_sin<T: Copy + Float>(u: &[T]) -> Vec<T> {
-    vec_unary_op(u, |x| x.sin())
-}
-pub fn ele_cos<T: Copy + Float>(u: &[T]) -> Vec<T> {
-    vec_unary_op(u, |x| x.cos())
 }
 
 /// Find argmax of slice.

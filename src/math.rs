@@ -108,8 +108,13 @@ macro_rules! math_vector_unary_op {
     }
 }
 
+math_vector_unary_op!(Abs, abs);
+math_vector_unary_op!(Ceil, ceil);
+math_vector_unary_op!(Floor, floor);
+math_vector_unary_op!(Round, round);
 math_vector_unary_op!(Sin, sin);
 math_vector_unary_op!(Cos, cos);
+math_vector_unary_op!(Tan, tan);
 math_vector_unary_op!(Exp, exp);
 math_vector_unary_op!(Ln, ln);
 
@@ -123,9 +128,14 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
 
     env.insert_native_word("dot",  Dot::new);
 
+    env.insert_native_word("abs",  Abs::new);
+    env.insert_native_word("floor",  Floor::new);
+    env.insert_native_word("ceil",  Ceil::new);
+    env.insert_native_word("round",  Round::new);
     env.insert_native_word("sin",  Sin::new);
     env.insert_native_word("cos",  Cos::new);
+    env.insert_native_word("tan",  Tan::new);
     env.insert_native_word("exp",  Exp::new);
-    env.insert_native_word("ln",  Ln::new);
+    env.insert_native_word("log",  Ln::new);
 }
 
