@@ -30,11 +30,60 @@ impl NativeWord for Set {
     }
 }
 
+macro_rules! base_stack_op {
+    ($name:ident, $op:ident) => {
+        struct $name {}
+        impl $name {
+            pub fn new()->Box<dyn NativeWord> {
+                Box::new($name {})
+            }
+        }
+        impl NativeWord for $name {
+            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+                stack.$op();
+            }
+        }
+    }
+}
+
 base_stack_op!{DropW , drop}
 base_stack_op!{Dup , dup}
 base_stack_op!{Dup2 , dup2}
 base_stack_op!{Swap , swap}
 base_stack_op!{Rot , rot}
+
+macro_rules! base_binary_op {
+    ($name:ident, $op:tt) => {
+        struct $name {}
+        impl $name {
+            pub fn new()->Box<dyn NativeWord> {
+                Box::new($name {})
+            }
+        }
+        impl NativeWord for $name {
+            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+                if stack.top().is_vector() {
+                    let a = stack.pop_vector();
+                    let b = stack.pop_vector();
+                    let c = &*b.vec() $op &*a.vec();
+                    stack.push_vector( SharedVector::new(c) );
+                    return;
+                }
+                let a = stack.pop_number();
+                if stack.top().is_vector() {
+                    let b = stack.pop_vector();
+                    let c = &*b.vec() $op a;
+                    stack.push_vector( SharedVector::new(c) );
+                    return;
+                }
+                let b = stack.pop_number();
+                let c = b $op a;
+                stack.push_number(c);
+            }
+        }
+    }
+}
+
 
 base_binary_op!{Add , +}
 base_binary_op!{Sub , -}

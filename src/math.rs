@@ -3,7 +3,24 @@ use crate::vector::Vector;
 use crate::stack::{YjrStack, YjrHash, YjrItem, SharedVector};
 use crate::runtime::{YjrEnviroment, NativeWord};
 
-// vector sum
+macro_rules! math_vector_number_op {
+    ($name:ident, $op:ident) => {
+        struct $name {}
+        impl $name {
+            pub fn new()->Box<dyn NativeWord> {
+                Box::new($name {})
+            }
+        }
+        impl NativeWord for $name {
+            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+                let a = stack.pop_vector();
+                let b = a.vec().$op();
+                stack.push_number(b);
+            }
+        }
+    }
+}
+// vector's sum, mean, variance
 math_vector_number_op!(Sum,  sum);
 math_vector_number_op!(Mean, mean);
 math_vector_number_op!(Var,  variance);
@@ -64,6 +81,23 @@ impl NativeWord for Zeros {
         }
 
         stack.push_vector( self.d.as_ref().unwrap().clone() );
+    }
+}
+
+macro_rules! math_vector_unary_op {
+    ($name:ident, $op:ident) => {
+        struct $name {}
+        impl $name {
+            pub fn new()->Box<dyn NativeWord> {
+                Box::new($name {})
+            }
+        }
+        impl NativeWord for $name {
+            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+                let a = stack.pop_vector();
+                stack.push_number(b);
+            }
+        }
     }
 }
 
