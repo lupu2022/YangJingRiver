@@ -407,6 +407,11 @@ mod tests {
 
     #[test]
     fn simple_test() {
+        let mut env = YjrEnviroment::new();
+        let txt = "3.14 1.0 + sin";
+        let mut rt = env.build(txt);
+        rt.run();
+        println!("{:?}", rt.stack);
     }
 }
 

@@ -109,5 +109,7 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
     env.insert_native_word("%",  Mod::new);
     env.insert_native_word("*",  Mul::new);
     env.insert_native_word("/",  Div::new);
+
+    // creator of vector
 }
 
