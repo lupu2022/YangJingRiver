@@ -1,6 +1,7 @@
-//use crate::TNT;
+use crate::TNT;
 use crate::stack::{YjrStack, YjrHash, YjrItem, SharedVector};
 use crate::runtime::{YjrEnviroment, NativeWord};
+use crate::vector::Vector;
 
 struct Get {}
 impl Get {
@@ -13,6 +14,25 @@ impl NativeWord for Get {
         let name = stack.pop_string();
         let item: YjrItem = hash.get(&name);
         stack.push(item);
+    }
+}
+
+struct GetWith {}
+impl GetWith {
+    pub fn new() -> Box<dyn NativeWord> {
+        Box::new(Get{})
+    }
+}
+impl NativeWord for GetWith {
+    fn run(&mut self, stack: &mut YjrStack, hash: &mut YjrHash) {
+        let name = stack.pop_string();
+        let default = stack.pop();
+        if hash.find(&name) {
+            let item: YjrItem = hash.get(&name);
+            stack.push(item);
+        } else {
+            stack.push(default);
+        }
     }
 }
 
@@ -84,12 +104,47 @@ macro_rules! base_binary_op {
     }
 }
 
-
 base_binary_op!{Add , +}
 base_binary_op!{Sub , -}
 base_binary_op!{Mod , %}
 base_binary_op!{Mul , *}
 base_binary_op!{Div , /}
+
+macro_rules! vector_creator {
+    ($name:ident, $op:ident) => {
+        struct $name {
+            data: Option<SharedVector>
+        }
+        impl $name {
+            pub fn new()->Box<dyn NativeWord> {
+                Box::new($name {
+                    data: None
+                })
+            }
+        }
+        impl NativeWord for $name {
+            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+                if let Some(ref v) = self.data {
+                    stack.pop_number();
+                    stack.push_vector( v.clone() );
+                    return;
+                }
+
+                let size = stack.pop_number();
+                if size.fract() != 0.0 {
+                    panic!("Create vector with size must be a integer!");
+                }
+                let size = size as usize;
+                let v = SharedVector::new( Vector::<TNT>::$op(size) );
+                self.data = Some(v.clone());
+                stack.push_vector(v);
+            }
+        }
+    }
+}
+
+vector_creator!{Zeros, zeros}
+vector_creator!{Ones, ones}
 
 pub fn insert_native_words(env: &mut YjrEnviroment) {
     // Stack Operator
@@ -101,6 +156,7 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
 
     // Hash Operator
     env.insert_native_word("@",  Get::new);
+    env.insert_native_word("@~", GetWith::new);
     env.insert_native_word("!",  Set::new);
 
     // basic Arithmetic
@@ -111,5 +167,8 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
     env.insert_native_word("/",  Div::new);
 
     // creator of vector
+    env.insert_native_word("new~",  Zeros::new);
+    env.insert_native_word("zeros~", Zeros::new);
+    env.insert_native_word("ones~",  Ones::new);
 }
 

@@ -258,6 +258,9 @@ impl YjrHash {
             panic!("Hash is out of range!");
         }
     }
+    pub fn find(&self, _name: &str) -> bool {
+        todo!()
+    }
     pub fn get(&self, _name: &str) -> YjrItem {
         todo!()
     }

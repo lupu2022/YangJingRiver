@@ -97,7 +97,7 @@ impl YjrEnviroment {
                     panic!("Can't define new word inside a word.");
                 }
                 if !loop_code.is_none() {
-                    panic!("Can't define in a loop macro.");
+                    panic!("Can't define word in a loop macro.");
                 }
                 if !list_count.is_none() {
                     panic!("Can't define new word in a list macro.");
@@ -112,13 +112,13 @@ impl YjrEnviroment {
                 continue;
             } else if token == "#end" {
                 if !list_count.is_none() {
-                    panic!("Can't ending a word  or a loop in a list macro.");
+                    panic!("Can't ending a word or a loop in a list macro.");
                 }
 
                 if let Some(ref w) = loop_code {
                     // loop section ending
                     if w.len() == 0 {
-                        panic!("#loop macro without loop number!");
+                        panic!("#loop macro without loop count!");
                     }
                     if let WordCode::Number(ln) = w[0] {
                         if ln.fract() != 0.0 {
@@ -151,13 +151,13 @@ impl YjrEnviroment {
                         }
                         self.insert_user_word(s, new_word);
                     } else {
-                        panic!("First item must be a number in #loop");
+                        panic!("First item must be a word name in #define");
                     }
                     word_code = None;
                     continue;
                 }
-
                 panic!("Find #end without any begin primitive");
+
             } else if token == "[" {
                 if !loop_code.is_none() || !list_count.is_none() {
                     panic!("Can't define loop/list macro inside another loop/list macro");
@@ -257,7 +257,7 @@ impl YjrEnviroment {
             }
 
             // checking is a valid symbol
-            if symbol.starts_with("$") {
+            if symbol.starts_with("$") || symbol.starts_with("%") {
                 symbol.remove(0);
                 if !check_symbol( &symbol ) {
                     panic!("Symbol must include alphanumbric or '_'");
@@ -408,7 +408,7 @@ mod tests {
     #[test]
     fn simple_test() {
         let mut env = YjrEnviroment::new();
-        let txt = "3.14 1.0 + sin";
+        let txt = "3.14 1.0 + floor ones~";
         let mut rt = env.build(txt);
         rt.run();
         println!("{:?}", rt.stack);
