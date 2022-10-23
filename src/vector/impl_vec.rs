@@ -298,7 +298,6 @@ impl<T: Float + FromPrimitive> Vector<T> {
     vec_unary_op_fn!(tanh, tanh);
     vec_unary_op_fn!(trunc, trunc);
 
-
 }
 
 

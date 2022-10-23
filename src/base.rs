@@ -72,44 +72,6 @@ base_stack_op!{Dup2 , dup2}
 base_stack_op!{Swap , swap}
 base_stack_op!{Rot , rot}
 
-macro_rules! base_binary_op {
-    ($name:ident, $op:tt) => {
-        struct $name {}
-        impl $name {
-            pub fn new()->Box<dyn NativeWord> {
-                Box::new($name {})
-            }
-        }
-        impl NativeWord for $name {
-            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
-                if stack.top().is_vector() {
-                    let a = stack.pop_vector();
-                    let b = stack.pop_vector();
-                    let c = &*b.vec() $op &*a.vec();
-                    stack.push_vector( SharedVector::new(c) );
-                    return;
-                }
-                let a = stack.pop_number();
-                if stack.top().is_vector() {
-                    let b = stack.pop_vector();
-                    let c = &*b.vec() $op a;
-                    stack.push_vector( SharedVector::new(c) );
-                    return;
-                }
-                let b = stack.pop_number();
-                let c = b $op a;
-                stack.push_number(c);
-            }
-        }
-    }
-}
-
-base_binary_op!{Add , +}
-base_binary_op!{Sub , -}
-base_binary_op!{Mod , %}
-base_binary_op!{Mul , *}
-base_binary_op!{Div , /}
-
 macro_rules! vector_creator {
     ($name:ident, $op:ident) => {
         struct $name {
@@ -158,13 +120,6 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
     env.insert_native_word("@",  Get::new);
     env.insert_native_word("@~", GetWith::new);
     env.insert_native_word("!",  Set::new);
-
-    // basic Arithmetic
-    env.insert_native_word("+",  Add::new);
-    env.insert_native_word("-",  Sub::new);
-    env.insert_native_word("%",  Mod::new);
-    env.insert_native_word("*",  Mul::new);
-    env.insert_native_word("/",  Div::new);
 
     // creator of vector
     env.insert_native_word("zeros~", Zeros::new);

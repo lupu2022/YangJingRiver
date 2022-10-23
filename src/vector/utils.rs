@@ -3,7 +3,7 @@
 //! Contains support methods for linear algebra structs.
 
 use std::cmp;
-use libnum::{Zero};
+use libnum::{Zero, Float};
 use std::ops::{Add, Mul, Div};
 
 /// Compute dot product of two slices.
@@ -122,21 +122,6 @@ pub fn vec_bin_op<F, T>(u: &[T], v: &[T], f: F) -> Vec<T>
     out_vec
 }
 
-/*
-/// Compute vector sum of two slices.
-///
-pub fn vec_sum<T: Copy + Add<T, Output = T>>(u: &[T], v: &[T]) -> Vec<T> {
-    vec_bin_op(u, v, |x, y| x + y)
-}
-
-
-/// Compute vector difference two slices.
-///
-pub fn vec_sub<T: Copy + Sub<T, Output = T>>(u: &[T], v: &[T]) -> Vec<T> {
-    vec_bin_op(u, v, |x, y| x - y)
-}
-*/
-
 /// Computes elementwise multiplication.
 ///
 pub fn ele_mul<T: Copy + Mul<T, Output = T>>(u: &[T], v: &[T]) -> Vec<T> {
@@ -148,6 +133,24 @@ pub fn ele_mul<T: Copy + Mul<T, Output = T>>(u: &[T], v: &[T]) -> Vec<T> {
 pub fn ele_div<T: Copy + Div<T, Output = T>>(u: &[T], v: &[T]) -> Vec<T> {
     vec_bin_op(u, v, |x, y| x / y)
 }
+
+pub fn ele_atan2<T: Copy + Float>(u: &[T], v: &[T]) -> Vec<T> {
+    vec_bin_op(u, v, |x, y| x.atan2(y) )
+}
+pub fn ele_hypot<T: Copy + Float>(u: &[T], v: &[T]) -> Vec<T> {
+    vec_bin_op(u, v, |x, y| x.hypot(y) )
+}
+pub fn ele_max<T: Copy + Float>(u: &[T], v: &[T]) -> Vec<T> {
+    vec_bin_op(u, v, |x, y| x.max(y) )
+}
+pub fn ele_min<T: Copy + Float>(u: &[T], v: &[T]) -> Vec<T> {
+    vec_bin_op(u, v, |x, y| x.min(y) )
+}
+pub fn ele_powf<T: Copy + Float>(u: &[T], v: &[T]) -> Vec<T> {
+    vec_bin_op(u, v, |x, y| x.powf(y) )
+}
+
+
 
 /// Vectorized unary operation applied to one slices.
 ///

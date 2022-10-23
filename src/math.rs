@@ -92,14 +92,51 @@ math_vector_unary_op!(Tan, tan);
 math_vector_unary_op!(Tanh, tanh);
 math_vector_unary_op!(Trunc, trunc);
 
-pub fn insert_native_words(env: &mut YjrEnviroment) {
-    // vector to number
-    env.insert_native_word("sum",  Sum::new);
-    env.insert_native_word("mean",  Mean::new);
-    env.insert_native_word("var",  Var::new);
+macro_rules! math_binary_op {
+    ($name:ident, $op:tt) => {
+        struct $name {}
+        impl $name {
+            pub fn new()->Box<dyn NativeWord> {
+                Box::new($name {})
+            }
+        }
+        impl NativeWord for $name {
+            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+                if stack.top().is_vector() {
+                    let a = stack.pop_vector();
+                    let b = stack.pop_vector();
+                    let c = &*b.vec() $op &*a.vec();
+                    stack.push_vector( SharedVector::new(c) );
+                    return;
+                }
+                let a = stack.pop_number();
+                if stack.top().is_vector() {
+                    let b = stack.pop_vector();
+                    let c = &*b.vec() $op a;
+                    stack.push_vector( SharedVector::new(c) );
+                    return;
+                }
+                let b = stack.pop_number();
+                let c = b $op a;
+                stack.push_number(c);
+            }
+        }
+    }
+}
 
-    // vector and vector to number
-    env.insert_native_word("dot",  Dot::new);
+math_binary_op!{Add , +}
+math_binary_op!{Sub , -}
+math_binary_op!{Mod , %}
+math_binary_op!{Mul , *}
+math_binary_op!{Div , /}
+
+pub fn insert_native_words(env: &mut YjrEnviroment) {
+    // basic Arithmetic with broadcast
+    env.insert_native_word("+",  Add::new);
+    env.insert_native_word("-",  Sub::new);
+    env.insert_native_word("%",  Mod::new);
+    env.insert_native_word("*",  Mul::new);
+    env.insert_native_word("/",  Div::new);
 
     // vector to vector , number to number
     env.insert_native_word("abs",  Abs::new);
@@ -127,5 +164,15 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
     env.insert_native_word("tan",  Tan::new);
     env.insert_native_word("tanh",  Tanh::new);
     env.insert_native_word("trunc",  Trunc::new);
+
+    // vector to number
+    env.insert_native_word("sum",  Sum::new);
+    env.insert_native_word("mean",  Mean::new);
+    env.insert_native_word("var",  Var::new);
+
+    // vector and vector to number
+    env.insert_native_word("dot",  Dot::new);
+
+
 }
 
