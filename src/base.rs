@@ -167,7 +167,6 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
     env.insert_native_word("/",  Div::new);
 
     // creator of vector
-    env.insert_native_word("new~",  Zeros::new);
     env.insert_native_word("zeros~", Zeros::new);
     env.insert_native_word("ones~",  Ones::new);
 }

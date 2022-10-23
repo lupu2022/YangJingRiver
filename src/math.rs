@@ -42,48 +42,6 @@ impl NativeWord for Dot {
     }
 }
 
-struct Ones {
-    d:  Option<SharedVector>,
-}
-impl Ones {
-    pub fn new() -> Box<dyn NativeWord> {
-        Box::new( Ones{
-            d: None,
-        })
-    }
-}
-impl NativeWord for Ones {
-    fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
-        let size: usize = stack.pop_number() as usize;
-        if self.d.is_none() {
-            self.d = Some( SharedVector::new( Vector::<TNT>::ones(size) ) );
-        }
-
-        stack.push_vector( self.d.as_ref().unwrap().clone() );
-    }
-}
-
-struct Zeros {
-    d:  Option<SharedVector>,
-}
-impl Zeros {
-    pub fn new() -> Box<dyn NativeWord> {
-        Box::new( Zeros{
-            d: None,
-        })
-    }
-}
-impl NativeWord for Zeros {
-    fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
-        let size: usize = stack.pop_number() as usize;
-        if self.d.is_none() {
-            self.d = Some( SharedVector::new( Vector::<TNT>::zeros(size) ) );
-        }
-
-        stack.push_vector( self.d.as_ref().unwrap().clone() );
-    }
-}
-
 macro_rules! math_vector_unary_op {
     ($name:ident, $op:ident) => {
         struct $name {}
@@ -109,33 +67,65 @@ macro_rules! math_vector_unary_op {
 }
 
 math_vector_unary_op!(Abs, abs);
+math_vector_unary_op!(Acos, acos);
+math_vector_unary_op!(Acosh, acosh);
+math_vector_unary_op!(Asin, asin);
+math_vector_unary_op!(Asinh, asinh);
+math_vector_unary_op!(Atan, atan);
+math_vector_unary_op!(Atanh, atanh);
+math_vector_unary_op!(Cbrt, cbrt);
 math_vector_unary_op!(Ceil, ceil);
+math_vector_unary_op!(Cos, cos);
+math_vector_unary_op!(Cosh, cosh);
+math_vector_unary_op!(Exp, exp);
+math_vector_unary_op!(Exp2, exp2);
 math_vector_unary_op!(Floor, floor);
+math_vector_unary_op!(Fract, fract);
+math_vector_unary_op!(Ln, ln);
+math_vector_unary_op!(Log10, log10);
+math_vector_unary_op!(Recip, recip);
 math_vector_unary_op!(Round, round);
 math_vector_unary_op!(Sin, sin);
-math_vector_unary_op!(Cos, cos);
+math_vector_unary_op!(Sinh, sinh);
+math_vector_unary_op!(Sqrt, sqrt);
 math_vector_unary_op!(Tan, tan);
-math_vector_unary_op!(Exp, exp);
-math_vector_unary_op!(Ln, ln);
+math_vector_unary_op!(Tanh, tanh);
+math_vector_unary_op!(Trunc, trunc);
 
 pub fn insert_native_words(env: &mut YjrEnviroment) {
-    env.insert_native_word("ones",  Ones::new);
-    env.insert_native_word("zeros",  Zeros::new);
-
+    // vector to number
     env.insert_native_word("sum",  Sum::new);
     env.insert_native_word("mean",  Mean::new);
     env.insert_native_word("var",  Var::new);
 
+    // vector and vector to number
     env.insert_native_word("dot",  Dot::new);
 
+    // vector to vector , number to number
     env.insert_native_word("abs",  Abs::new);
-    env.insert_native_word("floor",  Floor::new);
+    env.insert_native_word("acos",  Acos::new);
+    env.insert_native_word("acosh",  Acosh::new);
+    env.insert_native_word("asin",  Asin::new);
+    env.insert_native_word("asinh",  Asinh::new);
+    env.insert_native_word("atan",  Atan::new);
+    env.insert_native_word("atanh",  Atanh::new);
+    env.insert_native_word("cbrt",  Cbrt::new);
     env.insert_native_word("ceil",  Ceil::new);
+    env.insert_native_word("cos",  Cos::new);
+    env.insert_native_word("cosh",  Cosh::new);
+    env.insert_native_word("exp",  Exp::new);
+    env.insert_native_word("exp2",  Exp2::new);
+    env.insert_native_word("floor",  Floor::new);
+    env.insert_native_word("fract",  Fract::new);
+    env.insert_native_word("ln",  Ln::new);
+    env.insert_native_word("log10",  Log10::new);
+    env.insert_native_word("recip",  Recip::new);
     env.insert_native_word("round",  Round::new);
     env.insert_native_word("sin",  Sin::new);
-    env.insert_native_word("cos",  Cos::new);
+    env.insert_native_word("sinh",  Sinh::new);
+    env.insert_native_word("sqrt",  Sqrt::new);
     env.insert_native_word("tan",  Tan::new);
-    env.insert_native_word("exp",  Exp::new);
-    env.insert_native_word("log",  Ln::new);
+    env.insert_native_word("tanh",  Tanh::new);
+    env.insert_native_word("trunc",  Trunc::new);
 }
 
