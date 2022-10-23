@@ -239,7 +239,7 @@ impl<T: Copy + Div<T, Output = T>> Vector<T> {
     }
 }
 
-macro_rules! vec_unary_op_fn (
+macro_rules! vec_unary_fn (
     ($fname:ident, $op:ident ) => (
         pub fn $fname(&self) -> Vector<T> {
             let new_data = utils::vec_unary_op(&self.data, |x| x.$op());
@@ -248,6 +248,27 @@ macro_rules! vec_unary_op_fn (
     )
 
 );
+
+macro_rules! vec_unary_fn_with (
+    ($fname:ident, $op:ident) => (
+        pub fn $fname(&self, w: T) -> Vector<T> {
+            let new_data = utils::vec_unary_op(&self.data, |x| x.$op(w));
+            Vector::new(new_data)
+        }
+    )
+
+);
+
+/*
+macro_rules! vec_fn_vec (
+    ($fname:ident, $op:ident ) => (
+        pub fn $fname(&self) -> Vector<T> {
+            let new_data = utils::vec_unary_op(&self.data, |x| x.$op());
+            Vector::new(new_data)
+        }
+    )
+);
+*/
 
 impl<T: Float + FromPrimitive> Vector<T> {
     /// The mean of the vector.
@@ -272,31 +293,37 @@ impl<T: Float + FromPrimitive> Vector<T> {
         var / FromPrimitive::from_usize(self.size() - 1).unwrap()
     }
 
-    vec_unary_op_fn!(abs, abs);
-    vec_unary_op_fn!(acos, acos);
-    vec_unary_op_fn!(acosh, acosh);
-    vec_unary_op_fn!(asin, asin);
-    vec_unary_op_fn!(asinh, asinh);
-    vec_unary_op_fn!(atan, atan);
-    vec_unary_op_fn!(atanh, atanh);
-    vec_unary_op_fn!(cbrt, cbrt);
-    vec_unary_op_fn!(ceil, ceil);
-    vec_unary_op_fn!(cos, cos);
-    vec_unary_op_fn!(cosh, cosh);
-    vec_unary_op_fn!(exp, exp);
-    vec_unary_op_fn!(exp2, exp2);
-    vec_unary_op_fn!(floor, floor);
-    vec_unary_op_fn!(fract, fract);
-    vec_unary_op_fn!(ln, ln);
-    vec_unary_op_fn!(log10, log10);
-    vec_unary_op_fn!(recip, recip);
-    vec_unary_op_fn!(round, round);
-    vec_unary_op_fn!(sin, sin);
-    vec_unary_op_fn!(sinh, sinh);
-    vec_unary_op_fn!(sqrt, sqrt);
-    vec_unary_op_fn!(tan, tan);
-    vec_unary_op_fn!(tanh, tanh);
-    vec_unary_op_fn!(trunc, trunc);
+    vec_unary_fn!(abs, abs);
+    vec_unary_fn!(acos, acos);
+    vec_unary_fn!(acosh, acosh);
+    vec_unary_fn!(asin, asin);
+    vec_unary_fn!(asinh, asinh);
+    vec_unary_fn!(atan, atan);
+    vec_unary_fn!(atanh, atanh);
+    vec_unary_fn!(cbrt, cbrt);
+    vec_unary_fn!(ceil, ceil);
+    vec_unary_fn!(cos, cos);
+    vec_unary_fn!(cosh, cosh);
+    vec_unary_fn!(exp, exp);
+    vec_unary_fn!(exp2, exp2);
+    vec_unary_fn!(floor, floor);
+    vec_unary_fn!(fract, fract);
+    vec_unary_fn!(ln, ln);
+    vec_unary_fn!(log10, log10);
+    vec_unary_fn!(recip, recip);
+    vec_unary_fn!(round, round);
+    vec_unary_fn!(sin, sin);
+    vec_unary_fn!(sinh, sinh);
+    vec_unary_fn!(sqrt, sqrt);
+    vec_unary_fn!(tan, tan);
+    vec_unary_fn!(tanh, tanh);
+    vec_unary_fn!(trunc, trunc);
+
+    vec_unary_fn_with!(atan2_, atan2);
+    vec_unary_fn_with!(hypot_, hypot);
+    vec_unary_fn_with!(max_, max);
+    vec_unary_fn_with!(min_, min);
+    vec_unary_fn_with!(powf_, powf);
 
 }
 

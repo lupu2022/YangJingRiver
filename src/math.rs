@@ -132,6 +132,9 @@ math_binary_op!{Div , /}
 
 pub fn insert_native_words(env: &mut YjrEnviroment) {
     // basic Arithmetic with broadcast
+    // vector with vector to vector
+    // vector with number to vector
+    // number with number to number
     env.insert_native_word("+",  Add::new);
     env.insert_native_word("-",  Sub::new);
     env.insert_native_word("%",  Mod::new);
@@ -165,14 +168,14 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
     env.insert_native_word("tanh",  Tanh::new);
     env.insert_native_word("trunc",  Trunc::new);
 
-    // vector to number
+
+    // vector reduce to number
     env.insert_native_word("sum",  Sum::new);
     env.insert_native_word("mean",  Mean::new);
     env.insert_native_word("var",  Var::new);
 
     // vector and vector to number
     env.insert_native_word("dot",  Dot::new);
-
 
 }
 
