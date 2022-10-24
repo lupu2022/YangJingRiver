@@ -256,19 +256,16 @@ macro_rules! vec_unary_fn_with (
             Vector::new(new_data)
         }
     )
-
 );
 
-/*
-macro_rules! vec_fn_vec (
+macro_rules! vec_fn_with (
     ($fname:ident, $op:ident ) => (
-        pub fn $fname(&self) -> Vector<T> {
-            let new_data = utils::vec_unary_op(&self.data, |x| x.$op());
+        pub fn $fname(&self, v: &Vector<T> ) -> Vector<T> {
+            let new_data = utils::vec_bin_op(&self.data, &v.data, |x, y| x.$op(y) );
             Vector::new(new_data)
         }
     )
 );
-*/
 
 impl<T: Float + FromPrimitive> Vector<T> {
     /// The mean of the vector.
@@ -325,6 +322,11 @@ impl<T: Float + FromPrimitive> Vector<T> {
     vec_unary_fn_with!(min_, min);
     vec_unary_fn_with!(powf_, powf);
 
+    vec_fn_with!(atan2__, atan2);
+    vec_fn_with!(hypot__, hypot);
+    vec_fn_with!(max__, max);
+    vec_fn_with!(min__, min);
+    vec_fn_with!(powf__, powf);
 }
 
 

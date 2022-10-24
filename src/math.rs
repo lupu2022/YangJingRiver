@@ -102,10 +102,11 @@ macro_rules! math_binary_op {
         }
         impl NativeWord for $name {
             fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+                /*
                 if stack.top().is_vector() {
                     let a = stack.pop_vector();
                     let b = stack.pop_vector();
-                    let c = &*b.vec() $op &*a.vec();
+                    let c = &*a.vec() $op &*b.vec();
                     stack.push_vector( SharedVector::new(c) );
                     return;
                 }
@@ -119,6 +120,25 @@ macro_rules! math_binary_op {
                 let b = stack.pop_number();
                 let c = b $op a;
                 stack.push_number(c);
+                */
+                if stack.top().is_vector() {
+                    let a = stack.pop_vector();
+                    if stack.top().is_vector() {
+                        let b = stack.pop_vector();
+                        let c = &*a.vec() $op &*b.vec();
+                        stack.push_vector( SharedVector::new(c) );
+                        return;
+                    } else {
+                        let b = stack.pop_number();
+                        let c = &*a.vec() $op b;
+                        stack.push_vector( SharedVector::new(c) );
+                        return;
+                    }
+                }
+                let a = stack.pop_number();
+                let b = stack.pop_number();
+                let c = a $op b;
+                stack.push_number(c);
             }
         }
     }
@@ -129,6 +149,45 @@ math_binary_op!{Sub , -}
 math_binary_op!{Mod , %}
 math_binary_op!{Mul , *}
 math_binary_op!{Div , /}
+
+macro_rules! math_binary_fn {
+    ($name:ident, $fn:ident, $fn_:ident, $fn__:ident) => {
+        struct $name {}
+        impl $name {
+            pub fn new()->Box<dyn NativeWord> {
+                Box::new($name {})
+            }
+        }
+        impl NativeWord for $name {
+            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+                if stack.top().is_vector() {
+                    let a = stack.pop_vector();
+                    if stack.top().is_vector() {
+                        let b = stack.pop_vector();
+                        let c = a.vec().$fn__( &*b.vec() );
+                        stack.push_vector( SharedVector::new(c) );
+                        return;
+                    } else {
+                        let b = stack.pop_number();
+                        let c = a.vec().$fn_( b );
+                        stack.push_vector( SharedVector::new(c) );
+                        return;
+                    }
+                }
+                let a = stack.pop_number();
+                let b = stack.pop_number();
+                let c = a.$fn(b);
+                stack.push_number(c);
+            }
+        }
+    }
+}
+
+math_binary_fn!{ Atan2, atan2, atan2_, atan2__ }
+math_binary_fn!{ Hypot, hypot, hypot_, hypot__ }
+math_binary_fn!{ Max, max, max_, max__ }
+math_binary_fn!{ Min, min, min_, min__ }
+math_binary_fn!{ Powf, powf, powf_, powf__ }
 
 pub fn insert_native_words(env: &mut YjrEnviroment) {
     // basic Arithmetic with broadcast
@@ -168,6 +227,14 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
     env.insert_native_word("tanh",  Tanh::new);
     env.insert_native_word("trunc",  Trunc::new);
 
+    // vector&vector to vector,
+    // vector&number to vector,
+    // number&number to number
+    env.insert_native_word("atan2",  Atan2::new);
+    env.insert_native_word("hypot",  Hypot::new);
+    env.insert_native_word("min",  Min::new);
+    env.insert_native_word("max",  Max::new);
+    env.insert_native_word("powf",  Powf::new);
 
     // vector reduce to number
     env.insert_native_word("sum",  Sum::new);
