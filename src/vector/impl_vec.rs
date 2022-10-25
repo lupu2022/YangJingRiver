@@ -318,12 +318,14 @@ impl<T: Float + FromPrimitive> Vector<T> {
 
     vec_unary_fn_with!(atan2_, atan2);
     vec_unary_fn_with!(hypot_, hypot);
+    vec_unary_fn_with!(log_, log);
     vec_unary_fn_with!(max_, max);
     vec_unary_fn_with!(min_, min);
     vec_unary_fn_with!(powf_, powf);
 
     vec_fn_with!(atan2__, atan2);
     vec_fn_with!(hypot__, hypot);
+    vec_fn_with!(log__, log);
     vec_fn_with!(max__, max);
     vec_fn_with!(min__, min);
     vec_fn_with!(powf__, powf);

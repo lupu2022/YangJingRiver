@@ -102,25 +102,6 @@ macro_rules! math_binary_op {
         }
         impl NativeWord for $name {
             fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
-                /*
-                if stack.top().is_vector() {
-                    let a = stack.pop_vector();
-                    let b = stack.pop_vector();
-                    let c = &*a.vec() $op &*b.vec();
-                    stack.push_vector( SharedVector::new(c) );
-                    return;
-                }
-                let a = stack.pop_number();
-                if stack.top().is_vector() {
-                    let b = stack.pop_vector();
-                    let c = &*b.vec() $op a;
-                    stack.push_vector( SharedVector::new(c) );
-                    return;
-                }
-                let b = stack.pop_number();
-                let c = b $op a;
-                stack.push_number(c);
-                */
                 if stack.top().is_vector() {
                     let a = stack.pop_vector();
                     if stack.top().is_vector() {
@@ -184,10 +165,34 @@ macro_rules! math_binary_fn {
 }
 
 math_binary_fn!{ Atan2, atan2, atan2_, atan2__ }
+math_binary_fn!{ Log, log, log_, log__ }
 math_binary_fn!{ Hypot, hypot, hypot_, hypot__ }
 math_binary_fn!{ Max, max, max_, max__ }
 math_binary_fn!{ Min, min, min_, min__ }
 math_binary_fn!{ Powf, powf, powf_, powf__ }
+
+// vector clamp
+struct Clamp {}
+impl Clamp {
+    pub fn new() -> Box<dyn NativeWord> {
+        Box::new(Clamp{})
+    }
+}
+impl NativeWord for Clamp {
+    fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+        let v: SharedVector = stack.pop_vector();
+        let b = stack.pop_number();
+        let a = stack.pop_number();
+
+        let mut new_data = Vec::with_capacity(v.vec().size());
+        for idx in v.vec().iter() {
+            new_data.push( idx.clamp(a, b) );
+        }
+
+        stack.push_vector( SharedVector::new( Vector::new(new_data) ) );
+    }
+}
+
 
 pub fn insert_native_words(env: &mut YjrEnviroment) {
     // basic Arithmetic with broadcast
@@ -232,9 +237,12 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
     // number&number to number
     env.insert_native_word("atan2",  Atan2::new);
     env.insert_native_word("hypot",  Hypot::new);
+    env.insert_native_word("log",  Log::new);
     env.insert_native_word("min",  Min::new);
     env.insert_native_word("max",  Max::new);
     env.insert_native_word("powf",  Powf::new);
+
+    env.insert_native_word("clamp",  Clamp::new);
 
     // vector reduce to number
     env.insert_native_word("sum",  Sum::new);
@@ -243,6 +251,5 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
 
     // vector and vector to number
     env.insert_native_word("dot",  Dot::new);
-
 }
 
