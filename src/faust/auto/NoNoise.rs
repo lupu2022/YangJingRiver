@@ -11,16 +11,16 @@
 use crate::faust::faust_help::*;
 
 
-pub struct NoNoise {
+pub struct dsp {
 	iRec0: [i32;2],
 	fSampleRate: i32,
 }
 
-impl FaustDsp for NoNoise {
+impl FaustDsp for dsp {
 	type T = F32;
 		
-	fn new() -> NoNoise { 
-		NoNoise {
+	fn new() -> dsp { 
+		dsp {
 			iRec0: [0;2],
 			fSampleRate: 0,
 		}
@@ -60,7 +60,7 @@ impl FaustDsp for NoNoise {
 		self.instance_clear();
 	}
 	fn init(&mut self, sample_rate: i32) {
-		NoNoise::class_init(sample_rate);
+		dsp::class_init(sample_rate);
 		self.instance_init(sample_rate);
 	}
 	
