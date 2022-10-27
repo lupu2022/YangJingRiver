@@ -9,6 +9,8 @@ use crate::math;
 enum WordCode {
     Number(TNT),
     Symbol(String),
+    GetOperator(),
+    SetOperator(),
     Native(String),
     User(String),
 }
@@ -17,6 +19,8 @@ enum WordCode {
 enum WordByte {
     Number(TNT),
     Symbol(usize),
+    GetOperator(),
+    SetOperator(),
     Native(usize),
     User(usize),
 }
@@ -25,9 +29,6 @@ type UserWord = Vec<WordCode>;
 type UserBinary = Vec<WordByte>;
 
 pub trait NativeWord  {
-    fn name(&self) -> &'static str {
-        return "unknow";
-    }
     fn run(&mut self, stack: &mut YjrStack);
 }
 
@@ -244,6 +245,16 @@ impl YjrEnviroment {
                 push_code(new_code);
                 continue;
             }
+            if symbol == "@" {
+                new_code = WordCode::GetOperator();
+                push_code(new_code);
+                continue;
+            }
+            if symbol == "!" {
+                new_code = WordCode::SetOperator();
+                push_code(new_code);
+                continue;
+            }
 
             // checking is a native word
             if self.native_words.get(&symbol).is_some() {
@@ -350,6 +361,12 @@ impl YjrRuntime {
                 WordCode::Symbol(s) => {
                     bin.push( WordByte::Symbol(self.string_id(s)) );
                 },
+                WordCode::GetOperator() => {
+                    bin.push( WordByte::GetOperator());
+                },
+                WordCode::SetOperator() => {
+                    bin.push( WordByte::SetOperator());
+                },
                 WordCode::Native(s) => {
                     bin.push( WordByte::Native( self.natives.len() ) );
                     self.natives.push( env.create_native(s) );
@@ -389,29 +406,18 @@ impl YjrRuntime {
                 WordByte::Symbol(s) => {
                     self.stack.push_string( self.strings[s].to_string() );
                 },
+                WordByte::GetOperator() => {
+                    let key = self.stack.pop_string();
+                    let item: YjrItem = self.hash.get(&key);
+                    self.stack.push(item);
+                },
+                WordByte::SetOperator() => {
+                    let key = self.stack.pop_string();
+                    let item: YjrItem = self.stack.pop();
+                    self.hash.set(&key, item);
+                },
                 WordByte::Native(n) => {
-                    let name = self.natives[n].name();
-                    if name == "unknow" {
-                        self.natives[n].run(&mut self.stack);
-                    } else if name == "get" {
-                        let key = self.stack.pop_string();
-                        let item: YjrItem = self.hash.get(&key);
-                        self.stack.push(item);
-                    } else if name == "get~" {
-                        let key = self.stack.pop_string();
-                        let default = self.stack.pop();
-                        if self.hash.find(&key) {
-                            let item: YjrItem = self.hash.get(&key);
-                            self.stack.push(item);
-                        } else {
-                            self.stack.push(default.clone());
-                            self.hash.set(&name, default);
-                        }
-                    } else if name == "set" {
-                        let key = self.stack.pop_string();
-                        let item: YjrItem = self.stack.pop();
-                        self.hash.set(&name, item);
-                    }
+                    self.natives[n].run(&mut self.stack);
                 },
                 WordByte::User(w) => {
                     assert!(w == (i + 1));

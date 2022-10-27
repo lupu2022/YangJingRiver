@@ -61,49 +61,6 @@ macro_rules! vector_creator {
 vector_creator!{Zeros, zeros}
 vector_creator!{Ones, ones}
 
-// Three basic operators
-struct Get {}
-impl Get {
-    pub fn new() -> Box<dyn NativeWord> {
-        Box::new(Get{})
-    }
-}
-impl NativeWord for Get {
-    fn name(&self) -> &'static str {
-        return "get";
-    }
-    fn run(&mut self, _stack: &mut YjrStack) {
-    }
-}
-
-struct GetWith {}
-impl GetWith {
-    pub fn new() -> Box<dyn NativeWord> {
-        Box::new(Get{})
-    }
-}
-impl NativeWord for GetWith {
-    fn name(&self) -> &'static str {
-        return "get~";
-    }
-    fn run(&mut self, _stack: &mut YjrStack) {
-    }
-}
-
-struct Set {}
-impl Set {
-    pub fn new() -> Box<dyn NativeWord> {
-        Box::new(Get{})
-    }
-}
-impl NativeWord for Set {
-    fn name(&self) -> &'static str {
-        return "set";
-    }
-    fn run(&mut self, _stack: &mut YjrStack) {
-    }
-}
-
 pub fn insert_native_words(env: &mut YjrEnviroment) {
     // Stack Operator
     env.insert_native_word("drop",  DropW::new);
@@ -111,11 +68,6 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
     env.insert_native_word("dup2",  Dup2::new);
     env.insert_native_word("swap",  Swap::new);
     env.insert_native_word("rot",  Rot::new);
-
-    // Only three hash operators
-    env.insert_native_word("@",  Get::new);
-    env.insert_native_word("@~", GetWith::new);
-    env.insert_native_word("!",  Set::new);
 
     // creator of vector
     env.insert_native_word("zeros~", Zeros::new);
