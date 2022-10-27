@@ -14,4 +14,4 @@ pub mod runtime;
 
 mod base;
 mod math;
-
+mod faust;
