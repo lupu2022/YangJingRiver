@@ -6,8 +6,7 @@ use crate::runtime::{YjrEnviroment, NativeWord};
 use crate::faust::faust_help::FaustDsp;
 use crate::faust::auto::*;
 
-
-struct NoiseWord {
+pub struct NoiseWord {
     dsp: NoNoise::dsp,
 }
 impl NoiseWord {
