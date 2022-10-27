@@ -4,6 +4,7 @@ use crate::TNT;
 use crate::stack::{YjrItem, YjrStack, YjrHash};
 use crate::base;
 use crate::math;
+use crate::faust;
 
 #[derive(Debug, PartialEq, Clone)]
 enum WordCode {
@@ -314,6 +315,7 @@ impl YjrEnviroment {
 
         base::insert_native_words(&mut env);
         math::insert_native_words(&mut env);
+        faust::insert_native_words(&mut env);
         env
     }
 
