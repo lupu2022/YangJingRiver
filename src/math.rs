@@ -12,7 +12,7 @@ macro_rules! math_vector_number_op {
             }
         }
         impl NativeWord for $name {
-            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+            fn run(&mut self, stack: &mut YjrStack) {
                 let a = stack.pop_vector();
                 let b = a.vec().$op();
                 stack.push_number(b);
@@ -33,7 +33,7 @@ impl Dot {
     }
 }
 impl NativeWord for Dot {
-    fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+    fn run(&mut self, stack: &mut YjrStack) {
         let a: SharedVector = stack.pop_vector();
         let b: SharedVector = stack.pop_vector();
 
@@ -51,7 +51,7 @@ macro_rules! math_vector_unary_op {
             }
         }
         impl NativeWord for $name {
-            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+            fn run(&mut self, stack: &mut YjrStack) {
                 if stack.top().is_vector() {
                     let a = stack.pop_vector();
                     let b = SharedVector::new( a.vec().$op() );
@@ -101,7 +101,7 @@ macro_rules! math_binary_op {
             }
         }
         impl NativeWord for $name {
-            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+            fn run(&mut self, stack: &mut YjrStack) {
                 if stack.top().is_vector() {
                     let a = stack.pop_vector();
                     if stack.top().is_vector() {
@@ -140,7 +140,7 @@ macro_rules! math_binary_fn {
             }
         }
         impl NativeWord for $name {
-            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+            fn run(&mut self, stack: &mut YjrStack) {
                 if stack.top().is_vector() {
                     let a = stack.pop_vector();
                     if stack.top().is_vector() {
@@ -179,7 +179,7 @@ impl Clamp {
     }
 }
 impl NativeWord for Clamp {
-    fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+    fn run(&mut self, stack: &mut YjrStack) {
         let v: SharedVector = stack.pop_vector();
         let b = stack.pop_number();
         let a = stack.pop_number();

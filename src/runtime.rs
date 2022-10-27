@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::TNT;
-use crate::stack::{YjrStack, YjrHash};
+use crate::stack::{YjrItem, YjrStack, YjrHash};
 use crate::base;
 use crate::math;
 
@@ -25,7 +25,10 @@ type UserWord = Vec<WordCode>;
 type UserBinary = Vec<WordByte>;
 
 pub trait NativeWord  {
-    fn run(&mut self, stack: &mut YjrStack, hash: &mut YjrHash);
+    fn name(&self) -> &'static str {
+        return "unknow";
+    }
+    fn run(&mut self, stack: &mut YjrStack);
 }
 
 pub struct YjrEnviroment {
@@ -293,13 +296,14 @@ impl YjrEnviroment {
     }
 
     pub fn new() -> Self {
-        let mut ret = YjrEnviroment {
+        let mut env = YjrEnviroment {
             user_words: HashMap::new(),
             native_words: HashMap::new(),
         };
-        base::insert_native_words(&mut ret);
-        math::insert_native_words(&mut ret);
-        ret
+
+        base::insert_native_words(&mut env);
+        math::insert_native_words(&mut env);
+        env
     }
 
     pub fn insert_native_word(&mut self, name: &str, word: fn() -> Box<dyn NativeWord>) {
@@ -311,7 +315,6 @@ impl YjrEnviroment {
         YjrRuntime::new(self, &main_code)
     }
 }
-
 
 pub struct YjrRuntime {
     pub stack:   YjrStack,
@@ -387,7 +390,28 @@ impl YjrRuntime {
                     self.stack.push_string( self.strings[s].to_string() );
                 },
                 WordByte::Native(n) => {
-                    self.natives[n].run(&mut self.stack, &mut self.hash);
+                    let name = self.natives[n].name();
+                    if name == "unknow" {
+                        self.natives[n].run(&mut self.stack);
+                    } else if name == "get" {
+                        let key = self.stack.pop_string();
+                        let item: YjrItem = self.hash.get(&key);
+                        self.stack.push(item);
+                    } else if name == "get~" {
+                        let key = self.stack.pop_string();
+                        let default = self.stack.pop();
+                        if self.hash.find(&key) {
+                            let item: YjrItem = self.hash.get(&key);
+                            self.stack.push(item);
+                        } else {
+                            self.stack.push(default.clone());
+                            self.hash.set(&name, default);
+                        }
+                    } else if name == "set" {
+                        let key = self.stack.pop_string();
+                        let item: YjrItem = self.stack.pop();
+                        self.hash.set(&name, item);
+                    }
                 },
                 WordByte::User(w) => {
                     assert!(w == (i + 1));

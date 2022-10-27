@@ -18,7 +18,7 @@ impl NoiseWord {
     }
 }
 impl NativeWord for NoiseWord {
-    fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+    fn run(&mut self, stack: &mut YjrStack) {
     }
 }
 

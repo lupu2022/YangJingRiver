@@ -3,53 +3,6 @@ use crate::stack::{YjrStack, YjrHash, YjrItem, SharedVector};
 use crate::runtime::{YjrEnviroment, NativeWord};
 use crate::vector::Vector;
 
-struct Get {}
-impl Get {
-    pub fn new() -> Box<dyn NativeWord> {
-        Box::new(Get{})
-    }
-}
-impl NativeWord for Get {
-    fn run(&mut self, stack: &mut YjrStack, hash: &mut YjrHash) {
-        let name = stack.pop_string();
-        let item: YjrItem = hash.get(&name);
-        stack.push(item);
-    }
-}
-
-struct GetWith {}
-impl GetWith {
-    pub fn new() -> Box<dyn NativeWord> {
-        Box::new(Get{})
-    }
-}
-impl NativeWord for GetWith {
-    fn run(&mut self, stack: &mut YjrStack, hash: &mut YjrHash) {
-        let name = stack.pop_string();
-        let default = stack.pop();
-        if hash.find(&name) {
-            let item: YjrItem = hash.get(&name);
-            stack.push(item);
-        } else {
-            stack.push(default);
-        }
-    }
-}
-
-struct Set {}
-impl Set {
-    pub fn new() -> Box<dyn NativeWord> {
-        Box::new(Get{})
-    }
-}
-impl NativeWord for Set {
-    fn run(&mut self, stack: &mut YjrStack, hash: &mut YjrHash) {
-        let name = stack.pop_string();
-        let item: YjrItem = stack.pop();
-        hash.set(&name, item);
-    }
-}
-
 macro_rules! base_stack_op {
     ($name:ident, $op:ident) => {
         struct $name {}
@@ -59,7 +12,7 @@ macro_rules! base_stack_op {
             }
         }
         impl NativeWord for $name {
-            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+            fn run(&mut self, stack: &mut YjrStack) {
                 stack.$op();
             }
         }
@@ -85,7 +38,7 @@ macro_rules! vector_creator {
             }
         }
         impl NativeWord for $name {
-            fn run(&mut self, stack: &mut YjrStack, _hash: &mut YjrHash) {
+            fn run(&mut self, stack: &mut YjrStack) {
                 if let Some(ref v) = self.data {
                     stack.pop_number();
                     stack.push_vector( v.clone() );
@@ -108,6 +61,49 @@ macro_rules! vector_creator {
 vector_creator!{Zeros, zeros}
 vector_creator!{Ones, ones}
 
+// Three basic operators
+struct Get {}
+impl Get {
+    pub fn new() -> Box<dyn NativeWord> {
+        Box::new(Get{})
+    }
+}
+impl NativeWord for Get {
+    fn name(&self) -> &'static str {
+        return "get";
+    }
+    fn run(&mut self, _stack: &mut YjrStack) {
+    }
+}
+
+struct GetWith {}
+impl GetWith {
+    pub fn new() -> Box<dyn NativeWord> {
+        Box::new(Get{})
+    }
+}
+impl NativeWord for GetWith {
+    fn name(&self) -> &'static str {
+        return "get~";
+    }
+    fn run(&mut self, _stack: &mut YjrStack) {
+    }
+}
+
+struct Set {}
+impl Set {
+    pub fn new() -> Box<dyn NativeWord> {
+        Box::new(Get{})
+    }
+}
+impl NativeWord for Set {
+    fn name(&self) -> &'static str {
+        return "set";
+    }
+    fn run(&mut self, _stack: &mut YjrStack) {
+    }
+}
+
 pub fn insert_native_words(env: &mut YjrEnviroment) {
     // Stack Operator
     env.insert_native_word("drop",  DropW::new);
@@ -116,7 +112,7 @@ pub fn insert_native_words(env: &mut YjrEnviroment) {
     env.insert_native_word("swap",  Swap::new);
     env.insert_native_word("rot",  Rot::new);
 
-    // Hash Operator
+    // Only three hash operators
     env.insert_native_word("@",  Get::new);
     env.insert_native_word("@~", GetWith::new);
     env.insert_native_word("!",  Set::new);
