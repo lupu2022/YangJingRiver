@@ -18,14 +18,14 @@ pub struct dsp {
 
 impl FaustDsp for dsp {
 	type T = F32;
-		
-	fn new() -> dsp { 
+
+	fn new() -> dsp {
 		dsp {
 			iRec0: [0;2],
 			fSampleRate: 0,
 		}
 	}
-	fn metadata(&self, m: &mut dyn Meta) { 
+	fn metadata(&self, m: &mut dyn Meta) {
 		m.declare("filename", "no.noise.dsp");
 		m.declare("name", "no.noise");
 		m.declare("noises.lib/name", "Faust Noise Generator Library");
@@ -41,7 +41,7 @@ impl FaustDsp for dsp {
 	fn get_num_outputs(&self) -> i32 {
 		return 1;
 	}
-	
+
 	fn class_init(sample_rate: i32) {
 	}
 	fn instance_reset_params(&mut self) {
@@ -63,28 +63,28 @@ impl FaustDsp for dsp {
 		dsp::class_init(sample_rate);
 		self.instance_init(sample_rate);
 	}
-	
+
 	fn build_user_interface(&self, ui_interface: &mut dyn UI<Self::T>) {
 		Self::build_user_interface_static(ui_interface);
 	}
-	
+
 	fn build_user_interface_static(ui_interface: &mut dyn UI<Self::T>) {
 		ui_interface.open_vertical_box("no.noise");
 		ui_interface.close_box();
 	}
-	
+
 	fn get_param(&self, param: ParamIndex) -> Option<Self::T> {
 		match param.0 {
 			_ => None,
 		}
 	}
-	
+
 	fn set_param(&mut self, param: ParamIndex, value: Self::T) {
 		match param.0 {
 			_ => {}
 		}
 	}
-	
+
 	fn compute(&mut self, count: i32, inputs: &[&[Self::T]], outputs: &mut[&mut[Self::T]]) {
 		let (outputs0) = if let [outputs0, ..] = outputs {
 			let outputs0 = outputs0[..count as usize].iter_mut();
