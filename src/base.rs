@@ -1,5 +1,5 @@
 use crate::TNT;
-use crate::stack::{YjrStack, YjrHash, YjrItem, SharedVector};
+use crate::stack::{YjrStack, SharedVector};
 use crate::runtime::{YjrEnviroment, NativeWord};
 use crate::vector::Vector;
 

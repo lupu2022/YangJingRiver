@@ -1,6 +1,5 @@
-use crate::TNT;
 use crate::vector::Vector;
-use crate::stack::{YjrStack, YjrHash, SharedVector};
+use crate::stack::{YjrStack, SharedVector};
 use crate::runtime::{YjrEnviroment, NativeWord};
 
 macro_rules! math_vector_number_op {
