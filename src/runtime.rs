@@ -742,7 +742,7 @@ mod tests {
 
     #[test]
     fn simple_run() {
-        let mut env = YjrEnviroment::new();
+        let mut env = YjrEnviroment::new(41100);
         let txt = "3.14 1.0 + floor ones~";
         let mut rt = env.build(txt);
         rt.run();
@@ -751,12 +751,9 @@ mod tests {
 
     #[test]
     fn simple_faust() {
-        let mut env = YjrEnviroment::new();
-        let txt = "100 dsp.no.noise";
+        let mut env = YjrEnviroment::new(41100);
+        let txt = "100 dsp.no.noise 10.0 swap * sin";
         let mut rt = env.build(txt);
-        rt.run();
-        println!("{:?}", rt.stack);
-
         rt.run();
         println!("{:?}", rt.stack);
     }
