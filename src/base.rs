@@ -1,6 +1,5 @@
 use crate::TNT;
-use crate::stack::{YjrStack, SharedVector};
-use crate::runtime::{YjrEnviroment, NativeWord};
+use crate::runtime::{YjrEnviroment, NativeWord, YjrStack, SharedVector};
 use crate::vector::Vector;
 
 macro_rules! base_stack_op {

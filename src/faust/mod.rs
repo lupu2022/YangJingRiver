@@ -1,4 +1,4 @@
-use crate::runtime::{YjrEnviroment, YjrRuntime};
+use crate::runtime::{YjrEnviroment};
 
 mod faust_help;
 mod auto;

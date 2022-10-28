@@ -1,6 +1,5 @@
 use crate::vector::Vector;
-use crate::stack::{YjrStack, SharedVector};
-use crate::runtime::{YjrEnviroment, NativeWord};
+use crate::runtime::{YjrEnviroment, NativeWord, YjrStack, SharedVector};
 
 macro_rules! math_vector_number_op {
     ($name:ident, $op:ident) => {
