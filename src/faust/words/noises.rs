@@ -1,6 +1,6 @@
 use crate::TNT;
 use crate::vector::Vector;
-use crate::runtime::{NativeWord, YjrStack, SharedVector};
+use crate::runtime::{YjrEnviroment, NativeWord, YjrStack, SharedVector};
 
 use crate::faust::faust_help::FaustDsp;
 use crate::faust::auto::*;
@@ -10,10 +10,12 @@ pub struct NoiseWord {
     dsp: NoNoise::dsp,
 }
 impl NoiseWord {
-    pub fn new() -> Box<dyn NativeWord> {
+    pub fn new(env: &YjrEnviroment) -> Box<dyn NativeWord> {
+        let mut dsp = NoNoise::dsp::new();
+        dsp.init( env.query("SampleRate").0 );
         Box::new( NoiseWord{
             ov: None,
-            dsp: NoNoise::dsp::new()
+            dsp: dsp
         })
     }
 }

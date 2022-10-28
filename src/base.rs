@@ -6,7 +6,7 @@ macro_rules! base_stack_op {
     ($name:ident, $op:ident) => {
         struct $name {}
         impl $name {
-            pub fn new()->Box<dyn NativeWord> {
+            pub fn new(_env: &YjrEnviroment)->Box<dyn NativeWord> {
                 Box::new($name {})
             }
         }
@@ -30,7 +30,7 @@ macro_rules! vector_creator {
             data: Option<SharedVector>
         }
         impl $name {
-            pub fn new()->Box<dyn NativeWord> {
+            pub fn new(_env: &YjrEnviroment)->Box<dyn NativeWord> {
                 Box::new($name {
                     data: None
                 })

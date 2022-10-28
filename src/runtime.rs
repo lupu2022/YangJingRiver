@@ -298,14 +298,14 @@ enum WordByte {
 
 type UserWord = Vec<WordCode>;
 type UserBinary = Vec<WordByte>;
-type EnvConfig =  (bool, i32, f32);
+type EnvConfig =  (i32, f32, bool);
 pub trait NativeWord  {
     fn run(&mut self, stack: &mut YjrStack);
 }
 
 pub struct YjrEnviroment {
     user_words: HashMap<String, UserWord >,
-    native_words: HashMap<String, fn()->Box<dyn NativeWord> >,
+    native_words: HashMap<String, fn(&YjrEnviroment)->Box<dyn NativeWord> >,
     settings:   HashMap<String, EnvConfig>,
 }
 
@@ -565,7 +565,7 @@ impl YjrEnviroment {
     fn create_native(&self, name: &str) -> Box<dyn NativeWord> {
         let ret = self.native_words.get(name);
         if let Some(f) = ret {
-            return f();
+            return f(self);
         }
         panic!("Can't find native word by name")
     }
@@ -584,7 +584,7 @@ impl YjrEnviroment {
             native_words: HashMap::new(),
             settings: HashMap::new()
         };
-        env.settings.insert("SampleRate".to_string() , (false, r, 0.0));
+        env.settings.insert("SampleRate".to_string() , (r, 0.0, false));
 
         base::insert_native_words(&mut env);
         math::insert_native_words(&mut env);
@@ -592,11 +592,14 @@ impl YjrEnviroment {
         env
     }
 
-    pub fn query(&self, _key: &str) -> EnvConfig {
-        todo!()
+    pub fn query(&self, key: &str) -> EnvConfig {
+        if let Some(v) = self.settings.get(key) {
+            return v.clone();
+        }
+        panic!("Can't find key in settings of enviroment");
     }
 
-    pub fn insert_native_word(&mut self, name: &str, word: fn() -> Box<dyn NativeWord>) {
+    pub fn insert_native_word(&mut self, name: &str, word: fn(&YjrEnviroment) -> Box<dyn NativeWord>) {
         self.native_words.insert(name.to_string(), word);
     }
 
@@ -752,7 +755,7 @@ mod tests {
     #[test]
     fn simple_faust() {
         let mut env = YjrEnviroment::new(41100);
-        let txt = "100 dsp.no.noise 10.0 swap * sin";
+        let txt = "100 10 dsp.os.osc sin";
         let mut rt = env.build(txt);
         rt.run();
         println!("{:?}", rt.stack);

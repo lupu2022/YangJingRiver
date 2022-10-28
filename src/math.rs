@@ -5,7 +5,7 @@ macro_rules! math_vector_number_op {
     ($name:ident, $op:ident) => {
         struct $name {}
         impl $name {
-            pub fn new()->Box<dyn NativeWord> {
+            pub fn new(_env: &YjrEnviroment)->Box<dyn NativeWord> {
                 Box::new($name {})
             }
         }
@@ -26,7 +26,7 @@ math_vector_number_op!(Var,  variance);
 // vector dot
 struct Dot {}
 impl Dot {
-    pub fn new() -> Box<dyn NativeWord> {
+    pub fn new(_env: &YjrEnviroment) -> Box<dyn NativeWord> {
         Box::new(Dot{})
     }
 }
@@ -44,7 +44,7 @@ macro_rules! math_vector_unary_op {
     ($name:ident, $op:ident) => {
         struct $name {}
         impl $name {
-            pub fn new()->Box<dyn NativeWord> {
+            pub fn new(_env: &YjrEnviroment)->Box<dyn NativeWord> {
                 Box::new($name {})
             }
         }
@@ -94,7 +94,7 @@ macro_rules! math_binary_op {
     ($name:ident, $op:tt) => {
         struct $name {}
         impl $name {
-            pub fn new()->Box<dyn NativeWord> {
+            pub fn new(_env: &YjrEnviroment)->Box<dyn NativeWord> {
                 Box::new($name {})
             }
         }
@@ -133,7 +133,7 @@ macro_rules! math_binary_fn {
     ($name:ident, $fn:ident, $fn_:ident, $fn__:ident) => {
         struct $name {}
         impl $name {
-            pub fn new()->Box<dyn NativeWord> {
+            pub fn new(_env: &YjrEnviroment)->Box<dyn NativeWord> {
                 Box::new($name {})
             }
         }
@@ -172,7 +172,7 @@ math_binary_fn!{ Powf, powf, powf_, powf__ }
 // vector clamp
 struct Clamp {}
 impl Clamp {
-    pub fn new() -> Box<dyn NativeWord> {
+    pub fn new(_env: &YjrEnviroment) -> Box<dyn NativeWord> {
         Box::new(Clamp{})
     }
 }
